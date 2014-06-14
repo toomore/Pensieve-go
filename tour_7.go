@@ -1,4 +1,5 @@
 //http://tour.golang.org/#7
+//http://blog.golang.org/gos-declaration-syntax
 package main
 
 import "fmt"
