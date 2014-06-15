@@ -3,23 +3,23 @@ package main
 
 import "fmt"
 
-func Sqrt(x float64) float64 {
-    z := float64(1)
+func Sqrt(x float64) (result float64) {
+    //z := float64(1)
     result_tmp := float64(0)
-    result := float64(0)
+    //result := float64(0)
 
-    for z < x {
+    //for z < x {
+    for z := float64(1); z < x; z++ {
         result_tmp = z - (((z * z) - x) / 2 * z)
         if result_tmp < 0 {
-           return result
+           return
         } else {
             result = result_tmp
         }
-        z += 1
     }
-    return z
+    return
 }
 
 func main() {
-    fmt.Println(Sqrt(9))
+    fmt.Println(Sqrt(144))
 }
