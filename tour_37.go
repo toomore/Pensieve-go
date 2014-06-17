@@ -3,14 +3,14 @@ package main
 
 import "fmt"
 
-var pow = make([]int, 10)
+var pow = make([]int, 5)
 
 func main() {
-    fmt.Println(pow)
-
     for i := range pow {
         pow[i] = 1 << uint(i)
     }
+
+    fmt.Println(pow)
 
     for _, v := range pow {
         fmt.Printf("%d\n", v)
