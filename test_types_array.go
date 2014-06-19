@@ -10,4 +10,7 @@ func main() {
     //fmt.Println(x[6:9])
     y := append(x, 1)
     fmt.Println(y)
+    for i, v := range x {
+        fmt.Println(i, v)
+    }
 }
