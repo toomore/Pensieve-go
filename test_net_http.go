@@ -10,8 +10,11 @@ func main() {
         fmt.Println("Error:", err)
     }
     defer reap.Body.Close()
-    fmt.Println(reap)
-    fmt.Println(reap.Status)
+    fmt.Println(
+        reap, "\n",
+        reap.Status, "\n",
+        reap.Cookies(), "\n",
+    )
     content, err := ioutil.ReadAll(reap.Body)
     fmt.Printf("%s", content)
 }
