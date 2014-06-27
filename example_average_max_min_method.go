@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func (x *Allprice) average() float64 {
-    return x.sum() / float64(len(x.args))
+    return x.sum() / x.len()
 }
 
 func (x *Allprice) sum() (total float64) {
@@ -38,6 +38,10 @@ func (x *Allprice) min() float64 {
     return maxormin(false, x.args...)
 }
 
+func (x *Allprice) len() float64 {
+    return float64(len(x.args))
+}
+
 type Allprice struct {
     args []float64
 }
@@ -47,6 +51,7 @@ func main() {
 
     x := Allprice{float64list}
     fmt.Println(x.args)
+    fmt.Println("LEN", x.len())
     fmt.Println("SUM", x.sum())
     fmt.Println("AVERAGE", x.average())
     fmt.Println("MAX", x.max())
