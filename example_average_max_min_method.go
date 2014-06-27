@@ -13,6 +13,7 @@ func (x *Allprice) sum() (total float64) {
     return
 }
 
+//http://golang.org/ref/spec#Passing_arguments_to_..._parameters
 func maxormin(max_min bool, args ...float64) (result float64) {
     result = args[0]
     for _, v := range args[1:] {
@@ -33,8 +34,8 @@ func (x *Allprice) max() float64 {
     return maxormin(true, x.args...)
 }
 
-func min(args ...float64) float64 {
-    return maxormin(false, args...)
+func (x *Allprice) min() float64 {
+    return maxormin(false, x.args...)
 }
 
 type Allprice struct {
@@ -44,14 +45,10 @@ type Allprice struct {
 func main() {
     float64list := []float64{1, 4, 3, 2, 5}
 
-    //http://golang.org/ref/spec#Passing_arguments_to_..._parameters
-    //fmt.Println("SUM", sum(float64list...))
-    //fmt.Println("AVERAGE", average(float64list...))
-    fmt.Println("MIN", min(float64list...))
-
     x := Allprice{float64list}
     fmt.Println(x.args)
     fmt.Println("SUM", x.sum())
     fmt.Println("AVERAGE", x.average())
     fmt.Println("MAX", x.max())
+    fmt.Println("MIN", x.min())
 }
