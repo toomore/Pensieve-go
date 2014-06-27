@@ -13,21 +13,36 @@ func sum(args ...float64) (total float64) {
     return
 }
 
-func max(args ...float64) (max float64) {
-    max = args[0]
+func maxormin(max_min bool, args ...float64) (result float64) {
+    result = args[0]
     for _, v := range args[1:] {
-        if v > max {
-            max = v
+        if max_min {
+            if v > result {
+                result = v
+            }
+        } else {
+            if v < result {
+                result = v
+            }
         }
     }
     return
 }
 
+func max(args ...float64) float64 {
+    return maxormin(true, args...)
+}
+
+func min(args ...float64) float64 {
+    return maxormin(false, args...)
+}
+
 func main() {
-    float64list := []float64{1, 2, 3, 4, 5}
+    float64list := []float64{1, 4, 3, 2, 5}
 
     //http://golang.org/ref/spec#Passing_arguments_to_..._parameters
     fmt.Println("SUM", sum(float64list...))
     fmt.Println("AVERAGE", average(float64list...))
     fmt.Println("MAX", max(float64list...))
+    fmt.Println("MIN", min(float64list...))
 }
