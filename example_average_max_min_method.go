@@ -2,9 +2,9 @@ package main
 
 import "fmt"
 
-//func average(args ...float64) float64 {
-//    return sum(args...) / float64(len(args))
-//}
+func (x *Allprice) average() float64 {
+    return x.sum() / float64(len(x.args))
+}
 
 func (x *Allprice) sum() (total float64) {
     for _, v := range x.args {
@@ -53,4 +53,5 @@ func main() {
     x := Allprice{float64list}
     fmt.Println(x.args)
     fmt.Println("SUM", x.sum())
+    fmt.Println("AVERAGE", x.average())
 }
