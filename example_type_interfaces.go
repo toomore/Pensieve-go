@@ -11,7 +11,12 @@ func (self *Allprice) sum() (total float64) {
     return
 }
 
+type allsum interface {
+    sum() float64
+}
+
 func main() {
     allprice := Allprice{10, 11, 12}
     fmt.Println(allprice.sum())
+    fmt.Println(allsum(&allprice).sum())
 }
