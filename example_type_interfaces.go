@@ -38,8 +38,11 @@ type allbase interface {
 }
 
 // multi type struct
+// `allsum` is a interface
+// http://golangtutorials.blogspot.tw/2011/06/interfaces-in-go.html
 type alltotalSum struct{
-    allprice []Allprice
+    //allprice []Allprice
+    allprice []allsum
 }
 
 func (self *alltotalSum) totalSum() (result float64) {
@@ -60,7 +63,9 @@ func main() {
     fmt.Println(allbase.average())
 
     allprice2 := Allprice{5, 6, 7}
-    multi := alltotalSum{[]Allprice{allprice, allprice2}}
+    //multiAttr := [...]allsum{&allprice, &allprice2}
+    //fmt.Println(multiAttr)
+    multi := alltotalSum{[]allsum{&allprice, &allprice2}}
     fmt.Println(multi)
     fmt.Println(multi.totalSum())
 }
