@@ -37,6 +37,19 @@ type allbase interface {
     //name() string
 }
 
+// multi type struct
+type alltotalSum struct{
+    allprice []Allprice
+}
+
+func (self *alltotalSum) totalSum() (result float64) {
+    for _, v := range self.allprice {
+        result += v.sum()
+    }
+    return
+
+}
+
 func main() {
     allprice := Allprice{10, 11, 12}
     fmt.Println(allprice.sum())
@@ -45,4 +58,9 @@ func main() {
     allbase := allbase(&allprice)
     fmt.Println(allbase.sum())
     fmt.Println(allbase.average())
+
+    allprice2 := Allprice{5, 6, 7}
+    multi := alltotalSum{[]Allprice{allprice, allprice2}}
+    fmt.Println(multi)
+    fmt.Println(multi.totalSum())
 }
