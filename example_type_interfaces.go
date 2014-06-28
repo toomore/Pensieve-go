@@ -11,6 +11,8 @@ func (self *Allprice) sum() (total float64) {
     return
 }
 
+//http://golang.org/ref/spec#Interface_types
+//An interface type specifies a method set called its interface.
 type allsum interface {
     sum() float64
 }
