@@ -6,9 +6,11 @@ func fibonacci() func(int) int {
     a := 0
     b := 1
     return func(x int) (result int) {
-        if x > 1 {
+        if x >= 2 {
             result = a + b
             a, b = b, result
+        }else if x == 1 {
+            result = 1
         }
         return
     }
