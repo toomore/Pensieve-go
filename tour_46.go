@@ -9,8 +9,8 @@ func fibonacci() func(int) int {
         if x >= 2 {
             result = a + b
             a, b = b, result
-        }else if x == 1 {
-            result = 1
+        } else if x == 1 {
+            return 1
         }
         return
     }
@@ -18,7 +18,7 @@ func fibonacci() func(int) int {
 
 func main() {
     fi := fibonacci()
-    for i := 0; i < 10; i++ {
+    for i := 0; i < 13; i++ {
         fmt.Println(i, fi(i))
     }
 }
