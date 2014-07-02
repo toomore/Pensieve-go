@@ -7,4 +7,5 @@ func main() {
     var s stack.Stack
     s.Push(123)
     fmt.Println(s)
+    fmt.Println("Len:", s.Len())
 }
