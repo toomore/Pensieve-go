@@ -9,3 +9,7 @@ func (stack *Stack) Push(x interface{}) {
 func (stack Stack) Len() int {
     return len(stack)
 }
+
+func (stack Stack) Cap() int {
+    return cap(stack)
+}

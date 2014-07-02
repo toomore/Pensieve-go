@@ -9,4 +9,5 @@ func main() {
     s.Push("Toomore")
     fmt.Println(s)
     fmt.Println("Len:", s.Len())
+    fmt.Println("Cap:", s.Cap())
 }
