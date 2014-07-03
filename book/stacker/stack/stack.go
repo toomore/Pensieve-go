@@ -13,3 +13,7 @@ func (stack Stack) Len() int {
 func (stack Stack) Cap() int {
     return cap(stack)
 }
+
+func (stack Stack) Top() interface{} {
+    return stack[len(stack)-1]
+}
