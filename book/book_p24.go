@@ -12,4 +12,6 @@ func main() {
     fmt.Println("Len:", s.Len())
     fmt.Println("Cap:", s.Cap())
     fmt.Println("Top:", s.Top())
+    fmt.Println("Pop:", s.Pop())
+    fmt.Println(s)
 }

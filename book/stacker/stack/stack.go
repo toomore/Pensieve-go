@@ -17,3 +17,10 @@ func (stack Stack) Cap() int {
 func (stack Stack) Top() interface{} {
     return stack[len(stack)-1]
 }
+
+func (stack *Stack) Pop() interface{} {
+    last := stack.Top()
+    new_stack := *stack
+    *stack = new_stack[:len(*stack)-1]
+    return last
+}
