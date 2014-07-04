@@ -9,4 +9,7 @@ func main() {
     x := uuid.NewRandom()
     fmt.Println(x)
     fmt.Println(uuid.Parse(x.String()))
+    fmt.Println(uuid.NewMD5(x, []byte{100}))
+    fmt.Println(x.Time())
+    fmt.Println(x.URN())
 }
