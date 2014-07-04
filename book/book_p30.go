@@ -2,9 +2,10 @@ package main
 
 import "fmt"
 import "os"
+import "path/filepath"
 
 func getFilenamesfromCmd() (inFiles, outFiles string, err error) {
-    return os.Args[1], os.Args[2], nil
+    return filepath.Base(os.Args[1]), filepath.Base(os.Args[2]), nil
 }
 
 func main() {
