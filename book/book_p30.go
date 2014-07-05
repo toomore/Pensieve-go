@@ -1,6 +1,8 @@
 package main
 
+import "bufio"
 import "fmt"
+import "io"
 import "log"
 import "os"
 import "path/filepath"
@@ -23,6 +25,23 @@ func getFilenamesfromCmd() (inFilename, outFilename string, err error) {
     return
 }
 
+func copyFiles(inFiles io.Reader, outFiles io.Writer) (info string) {
+    reader := bufio.NewReader(inFiles)
+    writer := bufio.NewWriter(outFiles)
+    eof := false
+    for !eof {
+        line, err := reader.ReadString('\n')
+        if err != io.EOF {
+            writer.WriteString(line)
+            fmt.Println(line)
+        } else {
+            eof = true
+        }
+    }
+    info = "test"
+    return
+}
+
 func main() {
     fmt.Println("In book page 30")
     inFilename, outFilename, err := getFilenamesfromCmd()
@@ -40,4 +59,6 @@ func main() {
         log.Fatal(err)
     }
     defer outFiles.Close()
+
+    copyFiles(inFiles, outFiles)
 }
