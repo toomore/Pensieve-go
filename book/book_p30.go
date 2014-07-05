@@ -25,9 +25,14 @@ func getFilenamesfromCmd() (inFilename, outFilename string, err error) {
     return
 }
 
-func copyFiles(inFiles io.Reader, outFiles io.Writer) (info string) {
+func copyFiles(inFiles io.Reader, outFiles io.Writer) (err error) {
     reader := bufio.NewReader(inFiles)
     writer := bufio.NewWriter(outFiles)
+
+    defer func() {
+        err = writer.Flush()
+    }()
+
     eof := false
     for !eof {
         line, err := reader.ReadString('\n')
@@ -38,7 +43,6 @@ func copyFiles(inFiles io.Reader, outFiles io.Writer) (info string) {
             eof = true
         }
     }
-    info = "test"
     return
 }
 

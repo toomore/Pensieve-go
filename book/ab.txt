@@ -1,0 +1,13 @@
+URL Fetch Go API Overview
+
+Python |Java |PHP |Go
+[Stack Overflow Questions]
+
+    Loading a custom key store in Google App Engine Java application
+    What happens if an application calls more than 10 asynchronous URL Fetch on Google App Engine?
+    GoogleAppEngine urlfetch timeout exception
+    GAE - AppEngine - DeadlineExceededError: Deadline exceeded while waiting for HTTP response from URL:
+    Why import urlfetch from Google App Engines?
+    See more...
+
+App Engine applications can communicate with other applications or access other resources on the web by fetching URLs. An app can use the URL Fetch service to issue HTTP and HTTPS requests and receive responses. The URL Fetch service uses Google's network infrastructure for efficiency and scaling purposes.
