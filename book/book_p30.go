@@ -26,5 +26,18 @@ func getFilenamesfromCmd() (inFilename, outFilename string, err error) {
 func main() {
     fmt.Println("In book page 30")
     inFilename, outFilename, err := getFilenamesfromCmd()
-    fmt.Println(inFilename, outFilename, err)
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    inFiles, outFiles := os.Stdin, os.Stdout
+    if inFiles, err = os.Open(inFilename); err != nil {
+        log.Fatal(err)
+    }
+    defer inFiles.Close()
+
+    if outFiles, err = os.Create(outFilename); err != nil {
+        log.Fatal(err)
+    }
+    defer outFiles.Close()
 }
