@@ -29,6 +29,7 @@ func copyFiles(inFiles io.Reader, outFiles io.Writer) (err error) {
     reader := bufio.NewReader(inFiles)
     writer := bufio.NewWriter(outFiles)
 
+    // Save data.
     defer func() {
         err = writer.Flush()
     }()
