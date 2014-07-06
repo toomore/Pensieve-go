@@ -6,8 +6,8 @@ import "io"
 import "log"
 import "os"
 import "path/filepath"
-import "strings"
 import "regexp"
+import "strings"
 
 func getFilenamesfromCmd() (inFilename, outFilename string, err error) {
     if len(os.Args) < 2 {
@@ -32,6 +32,13 @@ func replaceString(s string) (result string) {
     return
 }
 
+func makeStringMaps(s string, result *map[string]int) {
+    x := *result
+    for _, i := range strings.Fields(s) {
+        x[i] += 1
+    }
+}
+
 func copyFiles(inFiles io.Reader, outFiles io.Writer) (err error) {
     reader := bufio.NewReader(inFiles)
     writer := bufio.NewWriter(outFiles)
@@ -43,15 +50,19 @@ func copyFiles(inFiles io.Reader, outFiles io.Writer) (err error) {
 
     eof := false
     reg := regexp.MustCompile("[A-Za-z]+")
+    count := make(map[string]int)
     for !eof {
         line, err := reader.ReadString('\n')
         if err != io.EOF {
-            writer.WriteString(reg.ReplaceAllStringFunc(line, replaceString))
+            line = reg.ReplaceAllStringFunc(line, replaceString)
+            writer.WriteString(line)
+            makeStringMaps(line, &count)
             fmt.Println(line)
         } else {
             eof = true
         }
     }
+    fmt.Println(count)
     return
 }
 
