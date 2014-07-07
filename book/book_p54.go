@@ -1,6 +1,7 @@
 package main
 
 import "fmt"
+import "strings"
 
 const (
     Read = iota
@@ -8,6 +9,39 @@ const (
     Exec
 )
 
+type BigFlag int
+
+const (
+    Active BigFlag = 1 << iota
+    Send
+    Receive
+)
+
+var flag = Active | Send
+
+func (flag BigFlag) String() string {
+    var flags []string
+    if flag&Active == Active {
+        flags = append(flags, "Active")
+    }
+    if flag&Send == Send {
+        flags = append(flags, "Send")
+    }
+    if flag&Receive == Receive {
+        flags = append(flags, "Receive")
+    }
+    if len(flags) > 0 {
+        return fmt.Sprintf("%d(%s)", int(flag), strings.Join(flags, "|"))
+    }
+    return "0()"
+}
+
 func main() {
     fmt.Println(Read, Write, Exec)
+    fmt.Println(flag&Active)
+
+    a := 1 << 1 //0010
+    b := 1 << 3 //1000
+    fmt.Println(a&b) //0000
+    fmt.Println(a|b) //1010
 }
