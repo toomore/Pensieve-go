@@ -37,11 +37,15 @@ func (flag BigFlag) String() string {
 }
 
 func main() {
-    fmt.Println(Read, Write, Exec)
-    fmt.Println(flag&Active)
-
     a := 1 << 1 //0010
     b := 1 << 3 //1000
     fmt.Println(a&b) //0000
     fmt.Println(a|b) //1010
+
+    fmt.Println(Read, Write, Exec)
+    fmt.Println(Active)   // 001
+    fmt.Println(Send)     // 010
+    fmt.Println(Receive)  // 100
+    fmt.Println(Send|Receive)  // 110
+    fmt.Println(Active|Send|Receive)  // 111
 }
