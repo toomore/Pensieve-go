@@ -2,8 +2,10 @@ package main
 
 import "fmt"
 import "math"
-import "sort"
 import "net/http"
+import "sort"
+import "strconv"
+import "strings"
 
 type statistics struct {
     numbers []float64
@@ -46,7 +48,20 @@ func homePage(writer http.ResponseWriter, request *http.Request) {
         </form>`
     fmt.Fprint(writer, tpl)
     fmt.Fprint(writer, err)
-    fmt.Fprint(writer, request.Form)
+    if slice := request.Form["numbers"]; len(slice) > 0 {
+        fmt.Fprint(writer, request.Form)
+        fmt.Fprint(writer, processData(slice))
+    }
+}
+
+func processData(data []string) statistics {
+    text := strings.Replace(data[0], ",", " ", -1)
+    var numbers []float64
+    for _, value := range strings.Fields(text) {
+        float64_value, _ := strconv.ParseFloat(value, 64)
+        numbers = append(numbers, float64_value)
+    }
+    return getStatis(numbers)
 }
 
 func main() {
