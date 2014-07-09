@@ -54,14 +54,33 @@ func homePage(writer http.ResponseWriter, request *http.Request) {
     }
 }
 
-func processData(data []string) statistics {
+func processData(data []string) string {
     text := strings.Replace(data[0], ",", " ", -1)
     var numbers []float64
     for _, value := range strings.Fields(text) {
         float64_value, _ := strconv.ParseFloat(value, 64)
         numbers = append(numbers, float64_value)
     }
-    return getStatis(numbers)
+    tpl := `
+        <table>
+            <tr>
+                <td colspan="2">Resule</td>
+            </tr>
+            <tr>
+                <td>Numbers</td>
+                <td>%v</td>
+            </tr>
+            <tr>
+                <td>Meam</td>
+                <td>%f</td>
+            </tr>
+            <tr>
+                <td>Median</td>
+                <td>%f</td>
+            </tr>
+        </table>`
+    result := getStatis(numbers)
+    return fmt.Sprintf(tpl, result.numbers, result.mean, result.median)
 }
 
 func main() {
