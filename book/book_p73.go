@@ -3,6 +3,7 @@ package main
 import "fmt"
 import "math"
 import "sort"
+import "net/http"
 
 type statistics struct {
     numbers []float64
@@ -34,7 +35,23 @@ func getStatis(numbers []float64) (stats statistics) {
     return
 }
 
+func homePage(writer http.ResponseWriter, request *http.Request) {
+    err := request.ParseForm()
+    fmt.Println(request.Header)
+    tpl := `
+        <!DOCTYPE HTML>
+        <form action="/" method="POST">
+            <input type="text" name="numbers"><br>
+            <input type="submit" value="Calcular">
+        </form>`
+    fmt.Fprint(writer, tpl)
+    fmt.Fprint(writer, err)
+    fmt.Fprint(writer, request.Form)
+}
+
 func main() {
     numbers := []float64{5, 2, 3, 4, 1}
     fmt.Println(getStatis(numbers))
+    http.HandleFunc("/", homePage)
+    http.ListenAndServe(":9001", nil)
 }
