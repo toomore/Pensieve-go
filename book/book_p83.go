@@ -1,9 +1,12 @@
 package main
 
+import "bytes"
 import "fmt"
+import "os"
 import "strconv"
 import "strings"
 import "time"
+
 
 func main() {
     fmt.Println("123")
@@ -26,4 +29,13 @@ func main() {
     fmt.Println(strings.Repeat("功蓋許", 10))
     fmt.Println(strings.Title("Toomore is me."))
     fmt.Println(strings.TrimSpace(" I am Toomore! "))
+
+    // page 111 os.Stdout
+    fmt.Fprintln(os.Stdout, "ooo")
+    fmt.Println("ooo")
+    var buffer bytes.Buffer
+    buffer.WriteRune([]rune("功")[0])
+    buffer.WriteRune([]rune("功")[0])
+    fmt.Println(buffer)
+    fmt.Println(buffer.WriteTo(os.Stdout))
 }
