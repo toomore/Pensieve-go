@@ -38,4 +38,12 @@ func main() {
     buffer.WriteRune([]rune("功")[0])
     fmt.Println(buffer)
     fmt.Println(buffer.WriteTo(os.Stdout))
+    fmt.Println(strings.Map(mapString, "ABC"))
+    rr := strings.NewReader("abc")
+    fmt.Println(rr.Len())
+}
+
+func mapString(char rune) rune {
+    fmt.Println(char)
+    return 'x'
 }
