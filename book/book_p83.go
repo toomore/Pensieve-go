@@ -51,6 +51,10 @@ func main() {
         }
     }
     fmt.Println()
+
+    //page 115
+    fmt.Println(strconv.ParseFloat("1.5", 8))
+    fmt.Println(strconv.ParseInt("ffffff", 16, 32))
 }
 
 func mapString(char rune) rune {
