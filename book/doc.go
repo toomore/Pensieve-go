@@ -2,4 +2,4 @@
 Test doc.go
 */
 
-package book
+package main
