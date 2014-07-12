@@ -1,7 +1,8 @@
 package main
 
 import "fmt"
-import "./stacker/stack"
+//import "./stacker/stack"
+import "github.com/toomore/Pensieve-Go/book/stacker/stack"
 
 func main() {
     var s stack.Stack
