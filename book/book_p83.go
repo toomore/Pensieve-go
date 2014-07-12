@@ -41,6 +41,16 @@ func main() {
     fmt.Println(strings.Map(mapString, "ABC"))
     rr := strings.NewReader("abc")
     fmt.Println(rr.Len())
+
+    // page 113
+    for _, truth := range []string{"1", "t", "TRUE", "false", "F", "0", "5"} {
+        if result , err := strconv.ParseBool(truth); err != nil {
+            fmt.Printf("{%v}", err)
+        } else {
+            fmt.Println(truth, result, " ")
+        }
+    }
+    fmt.Println()
 }
 
 func mapString(char rune) rune {
