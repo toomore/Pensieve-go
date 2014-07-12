@@ -1,7 +1,7 @@
 package main
 
 import "fmt"
-import "stacker/stack"
+import "./stacker/stack"
 
 func main() {
     var s stack.Stack
