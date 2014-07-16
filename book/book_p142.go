@@ -2,6 +2,11 @@ package main
 
 import "fmt"
 
+func plus(a *int, b *int) {
+    *a++
+    *b++
+}
+
 // Pointers and values.
 func main() {
     a := 10
@@ -13,5 +18,7 @@ func main() {
     fmt.Println(a, *b)
     c := 100
     b = &c
+    fmt.Println(a, *b)
+    plus(&a, &*b)
     fmt.Println(a, *b)
 }
