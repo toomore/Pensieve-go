@@ -13,12 +13,22 @@ func httpGet(url string) []byte {
     return str
 }
 
-//type params map[string]string
+type params map[string]string
+
+func (p params) String() string {
+    result := url.Values{}
+    for key, value := range p {
+        result.Add(key, value)
+    }
+    return result.Encode()
+}
 
 func main() {
-    fmt.Printf("%s\n", httpGet("http://httpbin.org/get"))
-    v := url.Values{}
-    v.Add("name", "toomore")
-    v.Add("age", "30")
-    fmt.Println(v.Encode())
+    //fmt.Printf("%s\n", httpGet("http://httpbin.org/get"))
+    //v := url.Values{}
+    //v.Add("name", "toomore")
+    //v.Add("age", "30")
+    //fmt.Println(v.Encode())
+    p := params{"name": "toomore", "age": "30"}
+    fmt.Println(p)
 }
