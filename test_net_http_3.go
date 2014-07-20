@@ -9,7 +9,7 @@ type params struct {
 }
 
 func (p *params) String() string {
-    return fmt.Sprintf("%s", p.values)
+    return fmt.Sprintf("S: %s", p)
 }
 
 func (p *params) Update(data map[string]string) {
@@ -41,15 +41,16 @@ func main() {
     data["name"] = "Toomore"
     data["age"] = "30"
 
-    fmt.Println(data)
-    p.Update(data)
-    fmt.Println(p)
+    //fmt.Println(data)
+    //p.Update(data)
+    //fmt.Println(p)
 
     data["local"] = "Taiwan"
     p.Update(data)
     fmt.Println(p)
+    fmt.Printf("SS: %s\n", p)
 
-    fmt.Println(p.Encode())
+    //fmt.Println(p.Encode())
     //fmt.Println(len(p.values))
     //fmt.Println(p.Encode())
 }
