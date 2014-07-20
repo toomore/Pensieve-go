@@ -13,13 +13,20 @@ func (p *params) String() string {
 }
 
 func (p *params) Update(data map[string]string) {
-    p.result = url.Values{}
+    if len(p.values) == 0 {
+        p.values = make(map[string]string)
+    }
+
     for key, value := range data {
-        p.result.Add(key, value)
+        p.values[key] = value
     }
 }
 
 func (p *params) Encode() string {
+    p.result = url.Values{}
+    for key, value := range p.values {
+        p.result.Add(key, value)
+    }
     return p.result.Encode()
 }
 
@@ -36,7 +43,13 @@ func main() {
 
     fmt.Println(data)
     p.Update(data)
-    fmt.Println(p.result)
+    fmt.Println(p)
+
+    data["local"] = "Taiwan"
+    p.Update(data)
+    fmt.Println(p)
+
+    fmt.Println(p.Encode())
     //fmt.Println(len(p.values))
     //fmt.Println(p.Encode())
 }
