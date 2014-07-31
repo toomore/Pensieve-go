@@ -14,12 +14,26 @@ func (counter *Counter) Add() {
 	counter.count++
 }
 
-func AllAdd(counter MMM) {
-	counter.Add()
+type CounterB struct {
+	count int
+}
+
+func (counter *CounterB) Add() {
+	counter.count++
+	counter.count = counter.count * 10
+}
+
+func AllAdd(counter ...MMM) {
+	for _, value := range counter {
+		value.Add()
+	}
 }
 
 func main() {
 	var countA Counter
-	AllAdd(&countA) // Need pointer
+	var countB CounterB
+
+	AllAdd(&countA, &countB) // Need pointer
 	fmt.Println(countA.count)
+	fmt.Println(countB.count)
 }
