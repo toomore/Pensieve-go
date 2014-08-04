@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"runtime"
 )
 
 func HttpGet(url string, done chan []byte, index int) (data []byte) {
@@ -16,6 +17,7 @@ func HttpGet(url string, done chan []byte, index int) (data []byte) {
 }
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	done := make(chan []byte, 5)
 	var urls []string
 	urls = append(urls, "http://httpbin.org/get")
@@ -29,4 +31,5 @@ func main() {
 		<-done
 		//fmt.Println(<-done)
 	}
+	close(done)
 }
