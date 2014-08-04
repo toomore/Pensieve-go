@@ -9,12 +9,12 @@ import (
 )
 
 func HttpGet(url string, done chan []byte, index int) (data []byte) {
-	fmt.Println(index, url, time.Now())
+	fmt.Println("start", index, url, time.Now())
 	result, _ := http.Get(url)
 	defer result.Body.Close()
 	data, _ = ioutil.ReadAll(result.Body)
 	done <- data
-	fmt.Println(index, url, time.Now())
+	fmt.Println("End", index, url, time.Now())
 	return
 }
 
@@ -28,15 +28,12 @@ func main() {
 	urls = append(urls, "http://www.pinkoi.com")
 	urls = append(urls, "http://toomore.net/")
 
-	go func() {
-		fmt.Println("123")
-		for index, url := range urls {
-			result := HttpGet(url, done, index)
-			fmt.Println(index, url, len(result))
-		}
-	}()
+	for index, url := range urls {
+		go HttpGet(url, done, index)
+	}
 
 	for i := 0; i < len(urls); i++ {
 		<-done
 	}
+	close(done)
 }
