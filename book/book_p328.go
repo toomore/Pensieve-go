@@ -18,11 +18,21 @@ func HttpGet(url string, done chan []byte, index int) (data []byte) {
 	return
 }
 
+func DataLen(done []byte) {
+	fmt.Println("start DataLen", time.Now())
+	fmt.Println(len(done))
+	fmt.Println("End DataLen", time.Now())
+}
+
 func main() {
 	worker := runtime.NumCPU()
 	runtime.GOMAXPROCS(worker)
 	done := make(chan []byte, worker)
 	var urls []string
+	urls = append(urls, "http://httpbin.org/get")
+	urls = append(urls, "http://google.com/")
+	urls = append(urls, "http://www.pinkoi.com")
+	urls = append(urls, "http://toomore.net/")
 	urls = append(urls, "http://httpbin.org/get")
 	urls = append(urls, "http://google.com/")
 	urls = append(urls, "http://www.pinkoi.com")
@@ -33,7 +43,7 @@ func main() {
 	}
 
 	for i := 0; i < len(urls); i++ {
-		<-done
+		go DataLen(<-done)
 	}
 	close(done)
 }
