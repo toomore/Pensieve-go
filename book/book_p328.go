@@ -26,17 +26,16 @@ func DataLen(done []byte) {
 
 func main() {
 	worker := runtime.NumCPU()
+	fmt.Println(worker)
 	runtime.GOMAXPROCS(worker)
 	done := make(chan []byte, worker)
 	var urls []string
-	urls = append(urls, "http://httpbin.org/get")
-	urls = append(urls, "http://google.com/")
-	urls = append(urls, "http://www.pinkoi.com")
-	urls = append(urls, "http://toomore.net/")
-	urls = append(urls, "http://httpbin.org/get")
-	urls = append(urls, "http://google.com/")
-	urls = append(urls, "http://www.pinkoi.com")
-	urls = append(urls, "http://toomore.net/")
+	for i := 0; i <= worker; i++ {
+		urls = append(urls, "http://httpbin.org/get")
+		urls = append(urls, "http://google.com/")
+		urls = append(urls, "http://www.pinkoi.com")
+		urls = append(urls, "http://toomore.net/")
+	}
 
 	for index, url := range urls {
 		go HttpGet(url, done, index)
