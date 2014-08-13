@@ -10,7 +10,7 @@ func main() {
 	//data := make(map[string]string)
 	//data["name"] = "Toomore"
 	type JsonData struct {
-		name string
+		Name string // name must to be uppercase in first letter.
 	}
 	json_data := []JsonData{}
 	json.Unmarshal(data, &json_data)
