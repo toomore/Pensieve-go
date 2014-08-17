@@ -3,6 +3,8 @@ package main
 import (
 	"archive/zip"
 	"fmt"
+	"io"
+	"os"
 )
 
 func unpackZip(filename string) error {
@@ -16,11 +18,19 @@ func unpackZip(filename string) error {
 		fmt.Printf("%v %s\t%d\t%d\t%.2f%%\n",
 			mode, file.Name, file.CompressedSize, file.UncompressedSize,
 			(float64(file.UncompressedSize)-float64(file.CompressedSize))/float64(file.UncompressedSize)*100)
+		unpackZippedFile(file)
 	}
 	return nil
 }
 
-func unpackZippedFile(filename string, zipFile *zip.File) {
+func unpackZippedFile(zipFile *zip.File) {
+	writer, _ := os.Create(zipFile.Name)
+	defer writer.Close()
+	reader, _ := zipFile.Open()
+	defer reader.Close()
+	if _, err := io.Copy(writer, reader); err != nil {
+		fmt.Println("Zip File Copy wrong.")
+	}
 }
 
 func main() {
