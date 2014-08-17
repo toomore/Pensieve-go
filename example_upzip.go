@@ -21,7 +21,11 @@ func unpackZip(filename string) error {
 		fmt.Printf("%v %s\t%d\t%d\t%.2f%%\n",
 			mode, file.Name, file.CompressedSize, file.UncompressedSize,
 			(float64(file.UncompressedSize)-float64(file.CompressedSize))/float64(file.UncompressedSize)*100)
-		unpackZippedFile(file, unzipDir)
+		if mode.IsDir() {
+			os.MkdirAll(filepath.Join(unzipDir, file.Name), mode)
+		} else {
+			unpackZippedFile(file, unzipDir)
+		}
 	}
 	return nil
 }
