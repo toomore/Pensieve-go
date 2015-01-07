@@ -5,15 +5,15 @@ import (
 	"testing"
 )
 
-func BenchmarkA(*testing.B) {
+func BenchmarkA(t *testing.B) {
 	a := Calcu{Num: 0}
-	for i := 0; i < 1000000; i++ {
+	for i := 0; i < t.N; i++ {
 		a.A()
 	}
 }
-func BenchmarkB(*testing.B) {
+func BenchmarkB(t *testing.B) {
 	b := Calcu{Num: 0}
-	for i := 0; i < 1000000; i++ {
+	for i := 0; i < t.N; i++ {
 		b.B()
 	}
 }
