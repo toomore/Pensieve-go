@@ -1,9 +1,9 @@
 package main
 
 import (
+	"html/template"
 	"io"
 	"os"
-	"text/template"
 )
 
 type Data struct {
