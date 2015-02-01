@@ -3,8 +3,15 @@ package main
 import "text/template"
 import "os"
 
+type Data struct {
+	Name string
+	Age  string
+	Info string
+}
+
 func main() {
 	var t = template.New("main")
-	t = template.Must(t.ParseFiles("main.tpl"))
-	t.ExecuteTemplate(os.Stdout, "main", nil)
+	var result = &Data{Name: "Toomore"}
+	t = template.Must(t.ParseGlob("*.tpl"))
+	t.ExecuteTemplate(os.Stdout, "main", result)
 }

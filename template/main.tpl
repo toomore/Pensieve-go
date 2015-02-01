@@ -1,1 +1,1 @@
-{{define "main"}} I'm Toomore {{end}}
+{{define "main"}}I'm {{.Name}}({{.Age}}/{{.Info}})!{{end}}
