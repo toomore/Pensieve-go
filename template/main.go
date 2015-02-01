@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"os"
 	"text/template"
 )
@@ -11,11 +12,22 @@ type Data struct {
 	Info string
 }
 
+var templates = map[string]interface {
+	Execute(io.Writer, interface{}) error
+}{}
+
+func parseTemplate(sets [][]string) {
+	for _, set := range sets {
+		var t = template.Must(template.ParseFiles(set...))
+		t = t.Lookup("Root")
+		templates[set[0]] = t
+	}
+}
+
 func main() {
-	var t = template.New("")
 	var result = &Data{Name: "Toomore"}
-	//t = template.Must(t.ParseGlob("*.tpl"))
-	t = template.Must(t.ParseFiles([]string{"main.tpl", "layout.tpl"}...))
-	t = t.Lookup("Root")
-	t.Execute(os.Stdout, result)
+	parseTemplate([][]string{
+		{"main.tpl", "layout.tpl"},
+	})
+	templates["main.tpl"].Execute(os.Stdout, result)
 }

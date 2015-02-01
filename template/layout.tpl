@@ -1,5 +1,5 @@
 {{define "Root"}} Root
 
-{{template "main" $}}
+{{template "main" .}}
 
 {{end}}

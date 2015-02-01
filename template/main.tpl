@@ -1,1 +1,1 @@
-{{define "main"}}I'm {{.Name}}({{.Age}}/{{.Info}})!{{end}}
+{{define "main"}}I'm {{.Name}}({{.Age}}/{{.Info}})! {{end}}
