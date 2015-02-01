@@ -29,9 +29,6 @@ func parseTemplate(sets [][]string) {
 func serveHome(w http.ResponseWriter, req *http.Request) {
 	log.Print(req)
 	var result = &Data{Name: req.URL.Path}
-	parseTemplate([][]string{
-		{"main.tpl", "layout.tpl"},
-	})
 	//templates["main.tpl"].Execute(os.Stdout, result)
 	templates["main.tpl"].Execute(w, result)
 }
@@ -40,6 +37,9 @@ var httpAttr = flag.String("http", ":6688", "Http and port.")
 
 func main() {
 	flag.Parse()
+	parseTemplate([][]string{
+		{"main.tpl", "layout.tpl"},
+	})
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", serveHome)
 	log.Println("Starting...", *httpAttr)
