@@ -28,21 +28,34 @@ func parseTemplate(sets [][]string) {
 
 func serveHome(w http.ResponseWriter, req *http.Request) {
 	log.Print(req)
+	//templates["main.tpl"].Execute(os.Stdout, result)
+	templates["main.tpl"].Execute(w, nil)
+}
+
+func serveUser(w http.ResponseWriter, req *http.Request) {
+	log.Print(req)
 	var result = &Data{Name: req.URL.Path}
 	//templates["main.tpl"].Execute(os.Stdout, result)
-	templates["main.tpl"].Execute(w, result)
+	templates["user.tpl"].Execute(w, result)
 }
 
 var httpAttr = flag.String("http", ":6688", "Http and port.")
 
 func main() {
 	flag.Parse()
+
 	parseTemplate([][]string{
 		{"main.tpl", "layout.tpl"},
+		{"user.tpl", "layout.tpl"},
 	})
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", serveHome)
+	mux.HandleFunc("/user/", serveUser)
+
 	log.Println("Starting...", *httpAttr)
-	err := http.ListenAndServe(*httpAttr, mux)
-	log.Fatal(err)
+
+	if err := http.ListenAndServe(*httpAttr, mux); err != nil {
+		log.Fatal(err)
+	}
 }
