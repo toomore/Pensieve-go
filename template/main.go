@@ -1,9 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"io"
-	"os"
+	"net/http"
 )
 
 type Data struct {
@@ -24,10 +25,18 @@ func parseTemplate(sets [][]string) {
 	}
 }
 
-func main() {
-	var result = &Data{Name: "Toomore"}
+func serveHome(w http.ResponseWriter, req *http.Request) {
+	fmt.Println(req)
+	var result = &Data{Name: req.URL.Path}
 	parseTemplate([][]string{
 		{"main.tpl", "layout.tpl"},
 	})
-	templates["main.tpl"].Execute(os.Stdout, result)
+	//templates["main.tpl"].Execute(os.Stdout, result)
+	templates["main.tpl"].Execute(w, result)
+}
+
+func main() {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", serveHome)
+	http.ListenAndServe(":6688", mux)
 }
