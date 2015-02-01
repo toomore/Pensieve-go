@@ -1,17 +1,21 @@
 package main
 
-import "text/template"
-import "os"
+import (
+	"os"
+	"text/template"
+)
 
 type Data struct {
 	Name string
-	Age  string
+	Age  int
 	Info string
 }
 
 func main() {
-	var t = template.New("main")
+	var t = template.New("")
 	var result = &Data{Name: "Toomore"}
-	t = template.Must(t.ParseGlob("*.tpl"))
-	t.ExecuteTemplate(os.Stdout, "main", result)
+	//t = template.Must(t.ParseGlob("*.tpl"))
+	t = template.Must(t.ParseFiles([]string{"main.tpl", "layout.tpl"}...))
+	t = t.Lookup("Root")
+	t.Execute(os.Stdout, result)
 }
