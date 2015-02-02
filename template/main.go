@@ -28,6 +28,9 @@ func parseTemplate(sets [][]string) {
 
 func serveHome(w http.ResponseWriter, req *http.Request) {
 	log.Print(req)
+	if req.URL.Path != "/" {
+		w.Write([]byte("No page!!!"))
+	}
 	//templates["main.tpl"].Execute(os.Stdout, result)
 	templates["main.tpl"].Execute(w, nil)
 }
@@ -35,6 +38,8 @@ func serveHome(w http.ResponseWriter, req *http.Request) {
 func serveUser(w http.ResponseWriter, req *http.Request) {
 	log.Print(req)
 	var result = &Data{Name: req.URL.Path}
+	log.Println("REF", req.Referer())
+	log.Println("URL", req.URL)
 	//templates["main.tpl"].Execute(os.Stdout, result)
 	templates["user.tpl"].Execute(w, result)
 }
@@ -50,8 +55,9 @@ func main() {
 	})
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("/page/user", serveUser)
+	//mux.HandleFunc("/page/", http.NotFound)
 	mux.HandleFunc("/", serveHome)
-	mux.HandleFunc("/user/", serveUser)
 
 	log.Println("Starting...", *httpAttr)
 
