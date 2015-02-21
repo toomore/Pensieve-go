@@ -1,9 +1,11 @@
 package main
 
-import "fmt"
-
-func main() {
+func Alloc() int {
 	var a int
 	a = 1
-	fmt.Println(a)
+	return a
+}
+
+func main() {
+	Alloc()
 }
