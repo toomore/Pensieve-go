@@ -16,6 +16,12 @@ func aa() []string {
 	return b
 }
 
+var bb_b = strings.Split("123123123", "2")
+
+func bb() []string {
+	return bb_b
+}
+
 func main() {
 	aa()
 }
