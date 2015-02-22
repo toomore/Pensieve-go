@@ -45,3 +45,12 @@ func BenchmarkAllocdd(b *testing.B) {
 		dd()
 	}
 }
+
+func BenchmarkAllocee(b *testing.B) {
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i <= b.N; i++ {
+		ee()
+	}
+}

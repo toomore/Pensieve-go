@@ -34,6 +34,13 @@ func dd() []byte {
 	return a
 }
 
+func ee() map[string]string {
+	a := make(map[string]string)
+	a["name"] = "Toomore"
+	a["age"] = "30"
+	return a
+}
+
 func main() {
-	dd()
+	ee()
 }
