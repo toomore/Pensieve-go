@@ -27,3 +27,12 @@ func BenchmarkAllocbb(b *testing.B) {
 		bb()
 	}
 }
+
+func BenchmarkAlloccc(b *testing.B) {
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i <= b.N; i++ {
+		cc()
+	}
+}

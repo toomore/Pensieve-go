@@ -22,6 +22,12 @@ func bb() []string {
 	return bb_b
 }
 
+func cc() []string {
+	var a []string
+	a = append(a, "Toomore")
+	return a
+}
+
 func main() {
-	aa()
+	cc()
 }
