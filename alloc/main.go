@@ -28,6 +28,12 @@ func cc() []string {
 	return a
 }
 
+func dd() []byte {
+	var a []byte
+	a = append(a, "Toomore"...)
+	return a
+}
+
 func main() {
-	cc()
+	dd()
 }
