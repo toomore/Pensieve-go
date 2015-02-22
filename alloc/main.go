@@ -38,9 +38,31 @@ func ee() map[string]string {
 	a := make(map[string]string)
 	a["name"] = "Toomore"
 	a["age"] = "30"
+	a["address"] = "Taiwan"
 	return a
 }
 
+func ff() map[string]string {
+	a := map[string]string{
+		"name": "Toomore",
+		"age":  "30",
+	}
+	a["address"] = "Taiwan"
+	return a
+}
+
+var gg_a = map[string]string{
+	"name": "Toomore",
+	"age":  "30",
+}
+
+func gg(i int) map[string]string {
+	gg_a["address"] = "Taiwan"
+	ii := string(i)
+	gg_a[ii] = ii
+	return gg_a
+}
+
 func main() {
-	ee()
+	gg(1)
 }

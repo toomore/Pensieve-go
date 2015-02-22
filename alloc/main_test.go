@@ -10,7 +10,7 @@ func BenchmarkAlloc(b *testing.B) {
 	}
 }
 
-func BenchmarkAlloc2(b *testing.B) {
+func BenchmarkAllocaa(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 
@@ -52,5 +52,23 @@ func BenchmarkAllocee(b *testing.B) {
 
 	for i := 0; i <= b.N; i++ {
 		ee()
+	}
+}
+
+func BenchmarkAllocff(b *testing.B) {
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i <= b.N; i++ {
+		ff()
+	}
+}
+
+func BenchmarkAllocgg(b *testing.B) {
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i <= b.N; i++ {
+		gg(i)
 	}
 }
