@@ -1,6 +1,10 @@
 package main
 
-import "strings"
+import (
+	"log"
+	"strconv"
+	"strings"
+)
 
 func Alloc() int {
 	var a int
@@ -63,6 +67,18 @@ func gg(i int) map[string]string {
 	return gg_a
 }
 
+type hhmap map[string]string
+
+func hh(i int) map[string]string {
+	hh_a := hhmap{}
+	hh_a["address"] = "Taiwan"
+	ii := strconv.Itoa(i)
+	for range []int{1, 2, 3, 4, 5} {
+		hh_a[ii] = ii
+	}
+	return hh_a
+}
+
 func main() {
-	gg(1)
+	log.Println(hh(1))
 }
