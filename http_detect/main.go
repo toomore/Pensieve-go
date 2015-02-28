@@ -17,10 +17,6 @@ func init() {
 }
 
 func DoGet(baseURL *url.URL, path string, hostnames []string) {
-	//in := bufio.NewReader(os.Stdin)
-	//path, _ := in.ReadString('\n')
-	//path = strings.Replace(path, "\n", "", -1)
-
 	log.Println("baseURL:", baseURL)
 	log.Println("path:", path)
 	log.Println("hostnames:", hostnames)
@@ -32,7 +28,6 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 	wg.Add(len(hostnames))
 
 	done := make(chan string, len(hostnames))
-	//done := make(chan string, runtime.NumCPU())
 	for _, hostname := range hostnames {
 		baseURL.Host = hostname + "." + basehost
 
