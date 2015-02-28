@@ -56,7 +56,7 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 
 var path = flag.String("path", "/", "Path.")
 var baseURLStr = flag.String("base", "http://google.com", "Base url.")
-var hosts = flag.String("hosts", "www,www", "Hostname.")
+var hosts = flag.String("hosts", "www,docs", "Hostname.")
 
 func main() {
 	flag.Parse()
