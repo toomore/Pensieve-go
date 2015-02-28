@@ -12,14 +12,13 @@ import (
 	"time"
 )
 
-func init() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
-}
-
 func DoGet(baseURL *url.URL, path string, hostnames []string) {
+	runtime.GOMAXPROCS(*nCPU)
+
 	log.Println("baseURL:", baseURL)
 	log.Println("path:", path)
 	log.Println("hostnames:", hostnames)
+	log.Println("CPU Nums:", *nCPU)
 
 	baseURL.Path = path
 	var basehost = baseURL.Host
@@ -57,6 +56,7 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 var path = flag.String("path", "/", "Path.")
 var baseURLStr = flag.String("base", "http://google.com", "Base url.")
 var hosts = flag.String("hosts", "www,docs", "Hostname.")
+var nCPU = flag.Int("cpus", runtime.NumCPU(), "NumCPU.")
 
 func main() {
 	flag.Parse()
