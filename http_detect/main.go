@@ -22,10 +22,10 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 	baseURL.Path = path
 
 	var wg sync.WaitGroup
-	wg.Add(len(hostnames))
+	wg.Add(len(hostnames) * 2)
 
 	first := time.Now()
-	done := make(chan string, len(hostnames))
+	done := make(chan []byte, len(hostnames))
 	for _, hostname := range hostnames {
 		var dobaseURL = *baseURL
 		dobaseURL.Host = hostname + "." + dobaseURL.Host
@@ -33,28 +33,26 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 		go func(URLpath string) {
 			defer wg.Done()
 			runtime.Gosched()
-			var result string
+			var result []byte
 			start := time.Now()
-			result = fmt.Sprintf("[%s] [start] %s\n", URLpath, start)
+			result = append(result, fmt.Sprintf("[%s] [start] %s\n", URLpath, start)...)
 			resp, _ := http.Get(URLpath)
-			result += fmt.Sprintf("[%s] [status] %s\n", URLpath, resp.Status)
+			result = append(result, fmt.Sprintf("[%s] [status] %s\n", URLpath, resp.Status)...)
 
 			var doneNow = time.Now()
 			var doneTime = doneNow.Sub(start)
 			var doneFromInit = doneNow.Sub(first)
 
-			result += fmt.Sprintf("[%s] [done] %s %s (%s)\n", URLpath, doneTime, doneFromInit, doneFromInit-doneTime)
-			//result += fmt.Sprintf("[%s] [done from init] %s\n", URLpath, doneFromInit)
-			//result += fmt.Sprintf("[%s] [Sub] %s\n", URLpath, doneFromInit-doneTime)
+			result = append(result, fmt.Sprintf("[%s] [done] %s %s (%s)\n", URLpath, doneTime, doneFromInit, doneFromInit-doneTime)...)
 
 			done <- result
 		}(dobaseURL.String())
 	}
 
 	go func() {
-		defer wg.Done()
 		for msg := range done {
-			fmt.Println(msg)
+			fmt.Printf("%s", msg)
+			wg.Done()
 		}
 	}()
 	wg.Wait()
