@@ -20,7 +20,6 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 	log.Println("CPU Nums:", *nCPU)
 
 	baseURL.Path = path
-	var basehost = baseURL.Host
 
 	var wg sync.WaitGroup
 	wg.Add(len(hostnames))
@@ -28,7 +27,8 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 	first := time.Now()
 	done := make(chan string, len(hostnames))
 	for _, hostname := range hostnames {
-		baseURL.Host = hostname + "." + basehost
+		var dobaseURL = *baseURL
+		dobaseURL.Host = hostname + "." + dobaseURL.Host
 
 		go func(URLpath string) {
 			defer wg.Done()
@@ -48,7 +48,7 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 			//result += fmt.Sprintf("[%s] [Sub] %s\n", URLpath, doneFromInit-doneTime)
 
 			done <- result
-		}(baseURL.String())
+		}(dobaseURL.String())
 	}
 
 	go func() {
