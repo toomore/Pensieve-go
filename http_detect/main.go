@@ -13,7 +13,6 @@ import (
 )
 
 func DoGet(baseURL *url.URL, path string, hostnames []string) {
-	runtime.GOMAXPROCS(*nCPU)
 
 	log.Println("baseURL:", baseURL)
 	log.Println("path:", path)
@@ -26,6 +25,7 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 	var wg sync.WaitGroup
 	wg.Add(len(hostnames))
 
+	first := time.Now()
 	done := make(chan string, len(hostnames))
 	for _, hostname := range hostnames {
 		baseURL.Host = hostname + "." + basehost
@@ -38,7 +38,15 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 			result = fmt.Sprintf("[%s] [start] %s\n", URLpath, start)
 			resp, _ := http.Get(URLpath)
 			result += fmt.Sprintf("[%s] [status] %s\n", URLpath, resp.Status)
-			result += fmt.Sprintf("[%s] [done] %s\n", URLpath, time.Now().Sub(start))
+
+			var doneNow = time.Now()
+			var doneTime = doneNow.Sub(start)
+			var doneFromInit = doneNow.Sub(first)
+
+			result += fmt.Sprintf("[%s] [done] %s %s (%s)\n", URLpath, doneTime, doneFromInit, doneFromInit-doneTime)
+			//result += fmt.Sprintf("[%s] [done from init] %s\n", URLpath, doneFromInit)
+			//result += fmt.Sprintf("[%s] [Sub] %s\n", URLpath, doneFromInit-doneTime)
+
 			done <- result
 		}(baseURL.String())
 	}
@@ -55,11 +63,12 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 
 var path = flag.String("path", "/", "Path.")
 var baseURLStr = flag.String("base", "http://google.com", "Base url.")
-var hosts = flag.String("hosts", "www,docs", "Hostname.")
+var hosts = flag.String("hosts", "docs,www", "Hostname.")
 var nCPU = flag.Int("cpus", runtime.NumCPU(), "NumCPU.")
 
 func main() {
 	flag.Parse()
+	runtime.GOMAXPROCS(*nCPU)
 	baseURL, err := url.Parse(*baseURLStr)
 	if err != nil {
 		log.Fatal(err)
