@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"runtime"
 	"strings"
 	"sync"
@@ -13,11 +14,13 @@ import (
 )
 
 func DoGet(baseURL *url.URL, path string, hostnames []string) {
+	llog := log.New(os.Stdout, " - ", 0)
 
-	log.Println("baseURL:", baseURL)
-	log.Println("path:", path)
-	log.Println("hostnames:", hostnames)
-	log.Println("CPU Nums:", *nCPU)
+	llog.Println("Date:", time.Now())
+	llog.Println("baseURL:", baseURL)
+	llog.Println("path:", path)
+	llog.Println("hostnames:", hostnames)
+	llog.Println("CPU Nums:", *nCPU)
 
 	baseURL.Path = path
 
