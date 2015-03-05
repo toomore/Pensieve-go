@@ -31,12 +31,12 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 	done := make(chan []byte, *nCPU)
 	defer close(done)
 	for _, hostname := range hostnames {
+		var result []byte
 		var dobaseURL = *baseURL
 		dobaseURL.Host = hostname + "." + dobaseURL.Host
 
 		go func(URLpath string) {
 			runtime.Gosched()
-			var result []byte
 			start := time.Now()
 			result = append(result, fmt.Sprintf("[%s] [start] %s\n", URLpath, start)...)
 			resp, _ := http.Get(URLpath)
@@ -53,6 +53,7 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 	}
 
 	go func() {
+		runtime.Gosched()
 		for msg := range done {
 			fmt.Printf("%s", msg)
 			wg.Done()
