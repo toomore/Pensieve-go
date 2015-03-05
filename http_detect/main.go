@@ -28,7 +28,8 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 	wg.Add(len(hostnames))
 
 	first := time.Now()
-	done := make(chan []byte, len(hostnames))
+	done := make(chan []byte, *nCPU)
+	defer close(done)
 	for _, hostname := range hostnames {
 		var dobaseURL = *baseURL
 		dobaseURL.Host = hostname + "." + dobaseURL.Host
