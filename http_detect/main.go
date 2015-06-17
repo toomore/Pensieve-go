@@ -63,18 +63,25 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 	fmt.Println("All Done!")
 }
 
-var path = flag.String("path", "/", "Path.")
-var baseURLStr = flag.String("base", "http://google.com", "Base url.")
-var hosts = flag.String("hosts", "docs,www", "Hostname.")
-var nCPU = flag.Int("cpus", runtime.NumCPU(), "NumCPU.")
+var (
+	path       = flag.String("path", "/", "Path.")
+	baseURLStr = flag.String("base", "http://google.com", "Base url.")
+	hosts      = flag.String("hosts", "docs,www", "Hostname.")
+	nCPU       = flag.Int("cpus", runtime.NumCPU(), "NumCPU.")
+)
 
 func main() {
 	flag.Parse()
 	runtime.GOMAXPROCS(*nCPU)
-	baseURL, err := url.Parse(*baseURLStr)
-	if err != nil {
+	var (
+		baseURL *url.URL
+		err     error
+	)
+
+	if baseURL, err = url.Parse(*baseURLStr); err != nil {
 		log.Fatal(err)
 	}
+
 	hostnames := strings.Split(*hosts, ",")
 	DoGet(baseURL, *path, hostnames)
 }
