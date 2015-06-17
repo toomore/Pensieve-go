@@ -21,6 +21,7 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 	llog.Println("path:", path)
 	llog.Println("hostnames:", hostnames)
 	llog.Println("CPU Nums:", *nCPU)
+	llog.Printf("NonStop: %d ms \n", *nonstop)
 
 	baseURL.Path = path
 
@@ -68,6 +69,7 @@ var (
 	baseURLStr = flag.String("base", "http://google.com", "Base url.")
 	hosts      = flag.String("hosts", "docs,www", "Hostname.")
 	nCPU       = flag.Int("cpus", runtime.NumCPU(), "NumCPU.")
+	nonstop    = flag.Int64("nonstop", 0, "Non-stop in ms.")
 )
 
 func main() {
@@ -83,5 +85,12 @@ func main() {
 	}
 
 	hostnames := strings.Split(*hosts, ",")
-	DoGet(baseURL, *path, hostnames)
+	for {
+		DoGet(baseURL, *path, hostnames)
+		if *nonstop > 0 {
+			time.Sleep(time.Duration(*nonstop) * time.Millisecond)
+		} else {
+			os.Exit(0)
+		}
+	}
 }
