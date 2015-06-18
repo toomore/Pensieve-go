@@ -85,21 +85,25 @@ func main() {
 	flag.Parse()
 	runtime.GOMAXPROCS(*nCPU)
 	var (
-		baseURL *url.URL
-		err     error
+		baseURL   *url.URL
+		err       error
+		hostnames []string
+		sleeptime time.Duration
 	)
 
 	if baseURL, err = url.Parse(*baseURLStr); err != nil {
 		log.Fatal(err)
 	}
 
-	hostnames := strings.Split(*hosts, ",")
-	for {
-		DoGet(baseURL, *path, hostnames)
-		if *nonstop > 0 {
-			time.Sleep(time.Duration(*nonstop) * time.Millisecond)
-		} else {
-			os.Exit(0)
+	hostnames = strings.Split(*hosts, ",")
+	sleeptime = time.Duration(*nonstop) * time.Millisecond
+	if sleeptime > 0 {
+		for {
+			DoGet(baseURL, *path, hostnames)
+			time.Sleep(sleeptime)
 		}
+	} else {
+		DoGet(baseURL, *path, hostnames)
+		os.Exit(0)
 	}
 }
