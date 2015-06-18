@@ -70,7 +70,7 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 		}
 	}()
 	wg.Wait()
-	fmt.Println("All Done!")
+	log.Println("All Done!")
 }
 
 var (
