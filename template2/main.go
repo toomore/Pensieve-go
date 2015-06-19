@@ -14,7 +14,7 @@ type data struct {
 func main() {
 	toomore := &data{Name: "Toomore", Age: 30}
 
-	if t, err := template.ParseFiles("./content.txt"); err == nil {
+	if t, err := template.ParseFiles("./content.txt", "./footer.txt"); err == nil {
 		t.Execute(os.Stdout, toomore)
 	} else {
 		log.Println(err)
