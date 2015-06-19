@@ -2,6 +2,7 @@ package main
 
 import (
 	"html/template"
+	"log"
 	"os"
 )
 
@@ -12,6 +13,10 @@ type data struct {
 
 func main() {
 	toomore := &data{Name: "Toomore", Age: 30}
-	t, _ := template.New("tt").Parse("Hi {{.Name}}, your age is {{.Age}}.\n")
-	t.Execute(os.Stdout, toomore)
+
+	if t, err := template.ParseFiles("./content.txt"); err == nil {
+		t.Execute(os.Stdout, toomore)
+	} else {
+		log.Println(err)
+	}
 }
