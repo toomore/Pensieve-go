@@ -1,0 +1,2 @@
+{{ define "footer" }}--
+http://blog.toomore.net/{{end}}

@@ -1,0 +1,4 @@
+Hi {{.Name}}, your age is {{.Age}}.
+
+Thanks...
+{{template "footer"}}

@@ -21,6 +21,7 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 	llog.Println("path:", path)
 	llog.Println("hostnames:", hostnames)
 	llog.Println("CPU Nums:", *nCPU)
+	llog.Printf("NonStop: %d ms \n", *nonstop)
 
 	baseURL.Path = path
 
@@ -31,16 +32,25 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 	done := make(chan []byte, *nCPU)
 	defer close(done)
 	for _, hostname := range hostnames {
-		var result []byte
-		var dobaseURL = *baseURL
+		var (
+			dobaseURL = *baseURL
+			result    []byte
+			status    string
+		)
 		dobaseURL.Host = hostname + "." + dobaseURL.Host
 
 		go func(URLpath string) {
 			runtime.Gosched()
 			start := time.Now()
 			result = append(result, fmt.Sprintf("[%s] [start] %s\n", URLpath, start)...)
-			resp, _ := http.Get(URLpath)
-			result = append(result, fmt.Sprintf("[%s] [status] %s\n", URLpath, resp.Status)...)
+
+			if resp, err := http.Get(URLpath); err == nil {
+				status = resp.Status
+			} else {
+				status = fmt.Sprintf("[Error] %s", err.Error())
+			}
+
+			result = append(result, fmt.Sprintf("[%s] [status] %s\n", URLpath, status)...)
 
 			var doneNow = time.Now()
 			var doneTime = doneNow.Sub(start)
@@ -60,21 +70,40 @@ func DoGet(baseURL *url.URL, path string, hostnames []string) {
 		}
 	}()
 	wg.Wait()
-	fmt.Println("All Done!")
+	log.Println("All Done!")
 }
 
-var path = flag.String("path", "/", "Path.")
-var baseURLStr = flag.String("base", "http://google.com", "Base url.")
-var hosts = flag.String("hosts", "docs,www", "Hostname.")
-var nCPU = flag.Int("cpus", runtime.NumCPU(), "NumCPU.")
+var (
+	path       = flag.String("path", "/", "Path.")
+	baseURLStr = flag.String("base", "http://google.com", "Base url.")
+	hosts      = flag.String("hosts", "docs,www", "Hostname.")
+	nCPU       = flag.Int("cpus", runtime.NumCPU(), "NumCPU.")
+	nonstop    = flag.Int64("nonstop", 0, "Non-stop in ms.")
+)
 
 func main() {
 	flag.Parse()
 	runtime.GOMAXPROCS(*nCPU)
-	baseURL, err := url.Parse(*baseURLStr)
-	if err != nil {
+	var (
+		baseURL   *url.URL
+		err       error
+		hostnames []string
+		sleeptime time.Duration
+	)
+
+	if baseURL, err = url.Parse(*baseURLStr); err != nil {
 		log.Fatal(err)
 	}
-	hostnames := strings.Split(*hosts, ",")
-	DoGet(baseURL, *path, hostnames)
+
+	hostnames = strings.Split(*hosts, ",")
+	sleeptime = time.Duration(*nonstop) * time.Millisecond
+	if sleeptime > 0 {
+		for {
+			DoGet(baseURL, *path, hostnames)
+			time.Sleep(sleeptime)
+		}
+	} else {
+		DoGet(baseURL, *path, hostnames)
+		os.Exit(0)
+	}
 }
