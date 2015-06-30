@@ -49,5 +49,6 @@ func main() {
 	//fmt.Println(msg.SendEmail(message()))
 	ses := simpleses.New(os.Getenv("AWSID"), os.Getenv("AWSKEY"))
 	msg := simpleses.Message([]*mail.Address{user}, sender, "This is send from SimpleSES.", "<b>Hello Toomore~.</b>")
-	fmt.Println(ses.SendEmail(msg))
+	result, err := ses.SendEmail(msg)
+	fmt.Printf("%+v [Error: %s]\n", result, err)
 }

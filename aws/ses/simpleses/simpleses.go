@@ -8,14 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses"
 )
 
-// SimpleSES struct
-type SimpleSES struct {
-	awsid  string
-	awskey string
-}
-
 // New to new a ses.SES
-func (s *SimpleSES) New(AWSID, AWSKEY string) *ses.SES {
+func New(AWSID, AWSKEY string) *ses.SES {
 	var config = aws.DefaultConfig
 	config.Region = "us-east-1"
 	config.Credentials = credentials.NewStaticCredentials(AWSID, AWSKEY, "")
@@ -29,7 +23,7 @@ func Message(ToUsers []*mail.Address, Sender *mail.Address, Subject, Content str
 	var mailContent = aws.String(Content)
 	var mailSubject = aws.String(Subject)
 
-	toUsers = make([]*string, len(toUsers))
+	toUsers = make([]*string, len(ToUsers))
 	for i, v := range ToUsers {
 		toUsers[i] = aws.String(v.String())
 	}
