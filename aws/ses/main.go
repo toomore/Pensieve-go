@@ -10,8 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses"
 )
 
-var profile = credentials.NewStaticCredentials(os.Getenv("AWSID"), os.Getenv("AWSKEY"), "")
-var config = aws.DefaultConfig
 var user = &mail.Address{
 	Name:    "講太多",
 	Address: "toomore0929@gmail.com",
@@ -20,11 +18,6 @@ var user = &mail.Address{
 var sender = &mail.Address{
 	Name:    "講太多",
 	Address: "me@toomore.net",
-}
-
-func init() {
-	config.Region = "us-east-1"
-	config.Credentials = profile
 }
 
 func message() *ses.SendEmailInput {
@@ -49,6 +42,10 @@ func message() *ses.SendEmailInput {
 }
 
 func main() {
+	var profile = credentials.NewStaticCredentials(os.Getenv("AWSID"), os.Getenv("AWSKEY"), "")
+	var config = aws.DefaultConfig
+	config.Region = "us-east-1"
+	config.Credentials = profile
 	msg := ses.New(config)
 	fmt.Printf("%+v\n", msg)
 	fmt.Println(msg.SendEmail(message()))
