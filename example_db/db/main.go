@@ -44,7 +44,17 @@ func Select() {
 	}
 }
 
+func SelectOne(id int64) {
+	var d = &user{}
+	if err := db.QueryRow("select name,mail from user where id=?", id).Scan(&d.Name, &d.Mail); err == nil {
+		log.Println(d)
+	} else {
+		log.Println(err)
+	}
+}
+
 func main() {
 	defer db.Close()
 	Select()
+	SelectOne(99)
 }
