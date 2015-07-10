@@ -30,14 +30,21 @@ type user struct {
 
 func Select() {
 	rows, err := db.Query("select id,name,mail from user;")
+	defer rows.Close()
+
 	log.Println(err)
+	datas := make([]*user, 0)
 	for rows.Next() {
 		d := &user{}
 		rows.Scan(&d.Id, &d.Name, &d.Mail)
-		log.Println(d)
+		datas = append(datas, d)
+	}
+	for _, v := range datas {
+		log.Println(v.Id, v)
 	}
 }
 
 func main() {
+	defer db.Close()
 	Select()
 }
