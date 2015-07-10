@@ -53,8 +53,24 @@ func SelectOne(id int64) {
 	}
 }
 
+func Insert() {
+	stmt, err := db.Prepare("Insert into user(name, mail, age) values(?, ?, ?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	if err == nil {
+		if result, err := stmt.Exec("Toomore", "toomore0929@gmail.com", 30); err == nil {
+			log.Println(result.LastInsertId())
+			log.Println(result.RowsAffected())
+		}
+	}
+}
+
 func main() {
 	defer db.Close()
 	Select()
 	SelectOne(99)
+	Insert()
 }
