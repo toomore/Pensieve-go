@@ -68,9 +68,26 @@ func Insert() {
 	}
 }
 
+func Update() {
+	stmt, err := db.Prepare("update user set mail=? where id=?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	if err == nil {
+		if result, err := stmt.Exec("me@toomore.net", 121); err == nil {
+			log.Println(result.LastInsertId())
+			log.Println(result.RowsAffected())
+		}
+	}
+
+}
+
 func main() {
 	defer db.Close()
 	Select()
 	SelectOne(99)
 	Insert()
+	Update()
 }
