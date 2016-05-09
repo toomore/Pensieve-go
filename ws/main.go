@@ -1,12 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 
 	"golang.org/x/net/websocket"
 )
+
+var wsPools = make(map[string]*websocket.Conn)
 
 // Echo the data received on the WebSocket.
 func EchoServer(ws *websocket.Conn) {
@@ -25,14 +28,26 @@ func EchoServer(ws *websocket.Conn) {
 
 func nonStop(ws *websocket.Conn) {
 	var msg = make([]byte, 512)
+	log.Println("In: ", ws.Request().Header["Sec-Websocket-Key"])
+	wsNo := ws.Request().Header["Sec-Websocket-Key"][0]
+	wsPools[wsNo] = ws
 	for {
 		if n, err := ws.Read(msg); err == nil {
-			log.Println(ws.Request().Header["Sec-Websocket-Key"], msg[:n])
-			ws.Write(msg[:n])
+			log.Println(wsNo, msg[:n])
+			for _, vws := range wsPools {
+				go func(vws *websocket.Conn) {
+					vws.Write(msg[:n])
+				}(vws)
+			}
 		} else {
-			log.Println(err)
+			log.Printf("%s, %+v", err, wsNo)
+			ws.Write([]byte("byby"))
+			delete(wsPools, wsNo)
 			break
 		}
+	}
+	for i := range wsPools {
+		fmt.Println("Rest: ", i)
 	}
 }
 
