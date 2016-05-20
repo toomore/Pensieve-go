@@ -5,14 +5,16 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
 )
 
 // New to new a ses.SES
 func New(AWSID, AWSKEY string) *ses.SES {
-	var config = aws.DefaultConfig
-	config.Region = "us-east-1"
-	config.Credentials = credentials.NewStaticCredentials(AWSID, AWSKEY, "")
+	var config = session.New(&aws.Config{
+		Region:      aws.String("us-east-1"),
+		Credentials: credentials.NewStaticCredentials(AWSID, AWSKEY, ""),
+	})
 	return ses.New(config)
 }
 
@@ -34,7 +36,7 @@ func Message(ToUsers []*mail.Address, Sender *mail.Address, Subject, Content str
 		},
 		Message: &ses.Message{
 			Body: &ses.Body{
-				HTML: &ses.Content{
+				Html: &ses.Content{
 					Charset: mailCharset,
 					Data:    mailContent,
 				},
