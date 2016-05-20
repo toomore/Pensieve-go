@@ -3,6 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
 )
 
 type Interface interface {
@@ -26,6 +29,7 @@ func run(data Interface) {
 }
 
 func main() {
+	log.Println(http.ListenAndServe(":6060", nil))
 	s := &Base{Name: "S****y"}
 	run(s)
 	s.call()
