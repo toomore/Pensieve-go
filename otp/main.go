@@ -6,6 +6,8 @@ import (
 	"image/png"
 	"io/ioutil"
 	"log"
+	"strings"
+	"time"
 
 	"github.com/pquerna/otp/totp"
 )
@@ -38,11 +40,22 @@ func valid(otpKey string, otp string) bool {
 	return totp.Validate(otp, otpKey)
 }
 
+func show(otpKey string) string {
+	code, err := totp.GenerateCode(otpKey, time.Now())
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return code
+}
+
 func main() {
 	flag.Parse()
-	if flag.Arg(0) == "gen" {
+	switch flag.Arg(0) {
+	case "gen":
 		gen()
-	} else {
+	case "show":
+		log.Println(show(strings.ToUpper(flag.Arg(1))))
+	default:
 		log.Println(valid(flag.Arg(0), flag.Arg(1)))
 	}
 }
