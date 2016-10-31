@@ -20,6 +20,7 @@ var (
 	sizeR   = regexp.MustCompile(`/[a-z][0-9]+x[0-9]+`)
 	filterV = regexp.MustCompile(`<script type="text/javascript">window._sharedData = (.+);</script>`)
 	user    = flag.String("name", "", "ig id")
+	getAll  = flag.Bool("all", false, "Get All")
 )
 
 const ig = `https://www.instagram.com/%s/?hl=zh-tw`
@@ -109,7 +110,12 @@ type IGData struct {
 	} `json:"entry_data"`
 }
 
-func parseJSON(data []byte) *IGData {
+type queryData struct {
+	Status string `json:"status"`
+	Media  media  `json:"media"`
+}
+
+func parseIndexJSON(data []byte) *IGData {
 	var r = &IGData{}
 	err := json.Unmarshal(data, &r)
 	if err != nil {
@@ -163,18 +169,90 @@ func downloadAvatar(user string, path string) {
 	}
 }
 
+func fetchAll(id string, username string, endCursor string, count int, cookies *http.Cookie) {
+	v := url.Values{}
+	v.Set("q", fmt.Sprintf(`ig_user(%s) { media.after(%s, %d) {
+  cornt,
+  nodes {
+    caption,
+    code,
+    comments {
+      count
+    },
+    comments_disabled,
+    date,
+    dimensions {
+      height,
+      width
+    },
+    display_src,
+    id,
+    is_video,
+    likes {
+      count
+    },
+    owner {
+      id
+    },
+    thumbnail_src,
+    video_views
+  },
+  page_info
+}
+ }`, id, endCursor, count))
+	v.Set("ref", "users::show")
+	//v.Set("query_id", "17842962958175392")
+
+	client := &http.Client{}
+	//log.Fatal(v.Encode())
+	req, err := http.NewRequest("POST", "https://www.instagram.com/query/", strings.NewReader(v.Encode()))
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Referer", fmt.Sprintf("https://www.instagram.com/%s/", username))
+	req.Header.Set("x-csrftoken", cookies.Value)
+	req.AddCookie(cookies)
+
+	//data, err := http.PostForm("https://www.instagram.com/query/", v)
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var data = &queryData{}
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var wg = &sync.WaitGroup{}
+	wg.Add(len(data.Media.Nodes))
+	for _, node := range data.Media.Nodes {
+		//fmt.Println("-----")
+		//fmt.Printf("%d => %+v\n", i, node)
+		//fmt.Println("-----")
+		go downloadNodeImage(node, username, wg)
+	}
+	wg.Wait()
+}
+
 func dosomebad(user string) {
 	prepareBox(user)
 
 	// Get nodes
 	fetchData := fetch(user)
 	defer fetchData.Body.Close()
-	data := parseJSON(filter1(fetchData.Body))
+	data := parseIndexJSON(filter1(fetchData.Body))
 	//fmt.Printf("%+v\n", data)
 	var wg = &sync.WaitGroup{}
-	defer wg.Wait()
-	wg.Add(len(data.EntryData.ProfilePage[0].User.Media.Nodes))
-	for _, node := range data.EntryData.ProfilePage[0].User.Media.Nodes {
+	UserData := data.EntryData.ProfilePage[0].User
+	wg.Add(len(UserData.Media.Nodes))
+	for _, node := range UserData.Media.Nodes {
 		//fmt.Println("-----")
 		//fmt.Printf("%d => %+v\n", i, node)
 		//fmt.Println("-----")
@@ -182,9 +260,18 @@ func dosomebad(user string) {
 	}
 
 	// Get avatar
-	downloadAvatar(user, data.EntryData.ProfilePage[0].User.ProfilePicURLHd)
+	downloadAvatar(user, UserData.ProfilePicURLHd)
 
-	fmt.Println(data.EntryData.ProfilePage[0].User.Username)
+	wg.Wait()
+
+	if *getAll {
+		log.Println("Get all data!!!!")
+		fmt.Printf("%+v\n", fetchData.Cookies()[0].Name)
+		fetchAll(UserData.ID, UserData.Username, UserData.Media.PageInfo.EndCursor, UserData.Media.Count, fetchData.Cookies()[0])
+	}
+
+	fmt.Println(UserData.Username)
+	fmt.Println(UserData.Media.Count)
 }
 
 func prepareBox(user string) {
@@ -203,8 +290,10 @@ func main() {
 	//var v = regexp.MustCompile(r)
 	//fmt.Println(v.MatchString(sample))
 	//fmt.Println(v.FindAllStringSubmatch(sample, -1))
+
 	flag.Parse()
 	if len(*user) > 0 {
 		dosomebad(*user)
 	}
+
 }
