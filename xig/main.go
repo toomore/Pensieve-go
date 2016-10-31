@@ -8,7 +8,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"regexp"
+	"strings"
+	"sync"
 )
 
 //const sample = `<script type="text/javascript">window._sharedData = {"country_code": "TW"};</script>`
@@ -65,13 +68,25 @@ type node struct {
 	} `json:"likes"`
 }
 
-type puser struct {
+type media struct {
+	Count    int    `json:"count"`
+	Nodes    []node `json:"nodes"`
+	PageInfo struct {
+		EndCursor       string `json:"end_cursor"`
+		HasNextPage     bool   `json:"has_next_page"`
+		HasPreviousPage bool   `json:"has_previous_page"`
+		StartCursor     string `json:"start_cursor"`
+	} `json:"page_info"`
+}
+
+type profilepage struct {
 	User struct {
 		Biography          string `json:"biography"`
 		FullName           string `json:"full_name"`
 		HasRequestedViewer bool   `json:"has_requested_viewer"`
 		ID                 string `json:"id"`
 		IsPrivate          bool   `json:"is_private"`
+		Media              media  `json:"media"`
 		ProfilePicURL      string `json:"profile_pic_url"`
 		ProfilePicURLHd    string `json:"profile_pic_url_hd"`
 		Username           string `json:"username"`
@@ -81,41 +96,62 @@ type puser struct {
 		Follows struct {
 			Count int `json:"count"`
 		} `json:"follows"`
-		Media struct {
-			Count    int `json:"count"`
-			PageInfo struct {
-				EndCursor       string `json:"end_cursor"`
-				HasNextPage     bool   `json:"has_next_page"`
-				HasPreviousPage bool   `json:"has_previous_page"`
-				StartCursor     string `json:"start_cursor"`
-			} `json:"page_info"`
-			Nodes []node `json:"nodes"`
-		} `json:"media"`
 	} `json:"user"`
 }
 
-type result struct {
+// IGData struct
+type IGData struct {
 	Code      string `json:"country_code"`
 	EntryData struct {
-		ProfilePage []puser `json:"ProfilePage"`
+		ProfilePage []profilepage `json:"ProfilePage"`
 	} `json:"entry_data"`
 }
 
-func parseJSON(data []byte) {
-
-	var r result
+func parseJSON(data []byte) *IGData {
+	var r = &IGData{}
 	err := json.Unmarshal(data, &r)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("%+v\n", r)
+	return r
+}
 
+func downloadNodeImage(node node, wg *sync.WaitGroup) {
+	defer wg.Done()
+	url, err := url.Parse(node.DisplaySrc)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(url.Path)
+	data, err := http.Get(node.DisplaySrc)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer data.Body.Close()
+	body, err := ioutil.ReadAll(data.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := ioutil.WriteFile(fmt.Sprintf("./img/%s", strings.Replace(url.Path, "/", "_", -1)), body, 0644); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func dosomebad(user string) {
-	resp := fetch(user)
-	strJSON := filter1(resp.Body)
-	parseJSON(strJSON)
+	fetchData := fetch(user)
+	defer fetchData.Body.Close()
+	data := parseJSON(filter1(fetchData.Body))
+	//fmt.Printf("%+v\n", data)
+	var wg = &sync.WaitGroup{}
+	defer wg.Wait()
+	wg.Add(len(data.EntryData.ProfilePage[0].User.Media.Nodes))
+	for _, node := range data.EntryData.ProfilePage[0].User.Media.Nodes {
+		//fmt.Println("-----")
+		//fmt.Printf("%d => %+v\n", i, node)
+		//fmt.Println("-----")
+		go downloadNodeImage(node, wg)
+	}
+	fmt.Println(data.EntryData.ProfilePage[0].User.Username)
 }
 
 func main() {
@@ -123,5 +159,7 @@ func main() {
 	//fmt.Println(v.MatchString(sample))
 	//fmt.Println(v.FindAllStringSubmatch(sample, -1))
 	flag.Parse()
-	dosomebad(*user)
+	if len(*user) > 0 {
+		dosomebad(*user)
+	}
 }
