@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
 	"sync"
@@ -116,7 +117,7 @@ func parseJSON(data []byte) *IGData {
 	return r
 }
 
-func downloadNodeImage(node node, wg *sync.WaitGroup) {
+func downloadNodeImage(node node, user string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	url, err := url.Parse(node.DisplaySrc)
 	if err != nil {
@@ -132,12 +133,13 @@ func downloadNodeImage(node node, wg *sync.WaitGroup) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := ioutil.WriteFile(fmt.Sprintf("./img/%s%s", node.Code, strings.Replace(url.Path, "/", "_", -1)), body, 0644); err != nil {
+	if err := ioutil.WriteFile(fmt.Sprintf("./%s/img/%s%s", user, node.Code, strings.Replace(url.Path, "/", "_", -1)), body, 0644); err != nil {
 		log.Fatal(err)
 	}
 }
 
 func dosomebad(user string) {
+	prepareBox(user)
 	fetchData := fetch(user)
 	defer fetchData.Body.Close()
 	data := parseJSON(filter1(fetchData.Body))
@@ -149,9 +151,14 @@ func dosomebad(user string) {
 		//fmt.Println("-----")
 		//fmt.Printf("%d => %+v\n", i, node)
 		//fmt.Println("-----")
-		go downloadNodeImage(node, wg)
+		go downloadNodeImage(node, user, wg)
 	}
 	fmt.Println(data.EntryData.ProfilePage[0].User.Username)
+}
+
+func prepareBox(user string) {
+	os.Mkdir(fmt.Sprintf("./%s", user), 0777)
+	os.Mkdir(fmt.Sprintf("./%s/img", user), 0777)
 }
 
 func main() {
