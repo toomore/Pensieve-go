@@ -132,7 +132,7 @@ func downloadNodeImage(node node, wg *sync.WaitGroup) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := ioutil.WriteFile(fmt.Sprintf("./img/%s", strings.Replace(url.Path, "/", "_", -1)), body, 0644); err != nil {
+	if err := ioutil.WriteFile(fmt.Sprintf("./img/%s%s", node.Code, strings.Replace(url.Path, "/", "_", -1)), body, 0644); err != nil {
 		log.Fatal(err)
 	}
 }
