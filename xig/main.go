@@ -50,7 +50,17 @@ func parseJSON(data []byte) {
 			Username string `json:"username"`
 			Follows  struct {
 				Count int `json:"count"`
-			}
+			} `json:"follows"`
+			FollowedBy struct {
+				Count int `json:"count"`
+			} `json:"followed_by"`
+			HRV             bool   `json:"has_requested_viewer"`
+			ProfilePicURLHd string `json:"profile_pic_url_hd"`
+			ProfilePicURL   string `json:"profile_pic_url"`
+			ID              string `json:"id"`
+			Biography       string `json:"biography"`
+			FullName        string `json:"full_name"`
+			IsPrivate       bool   `json:"is_private"`
 		} `json:"user"`
 	}
 
