@@ -17,6 +17,7 @@ import (
 
 //const sample = `<script type="text/javascript">window._sharedData = {"country_code": "TW"};</script>`
 var (
+	avataR  = regexp.MustCompile(`/s[0-9]+x[0-9]`)
 	filterV = regexp.MustCompile(`<script type="text/javascript">window._sharedData = (.+);</script>`)
 	user    = flag.String("name", "", "ig id")
 )
@@ -123,7 +124,7 @@ func downloadNodeImage(node node, user string, wg *sync.WaitGroup) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(url.Path)
+	//fmt.Println(url.Path)
 	data, err := http.Get(node.DisplaySrc)
 	if err != nil {
 		log.Fatal(err)
@@ -135,11 +136,37 @@ func downloadNodeImage(node node, user string, wg *sync.WaitGroup) {
 	}
 	if err := ioutil.WriteFile(fmt.Sprintf("./%s/img/%s%s", user, node.Code, strings.Replace(url.Path, "/", "_", -1)), body, 0644); err != nil {
 		log.Fatal(err)
+	} else {
+		log.Println(fmt.Sprintf("Saved `%s`, `%s`", node.Code, node.DisplaySrc))
+	}
+}
+
+func downloadAvatar(user string, path string) {
+	url, err := url.Parse(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	path = avataR.ReplaceAllString(path, "")
+	data, err := http.Get(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer data.Body.Close()
+	body, err := ioutil.ReadAll(data.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := ioutil.WriteFile(fmt.Sprintf("./%s/avatar/%s", user, strings.Replace(url.Path, "/", "_", -1)), body, 0644); err != nil {
+		log.Fatal(err)
+	} else {
+		log.Println(fmt.Sprintf("Saved `%s`, `%s`", user, path))
 	}
 }
 
 func dosomebad(user string) {
 	prepareBox(user)
+
+	// Get nodes
 	fetchData := fetch(user)
 	defer fetchData.Body.Close()
 	data := parseJSON(filter1(fetchData.Body))
@@ -153,12 +180,23 @@ func dosomebad(user string) {
 		//fmt.Println("-----")
 		go downloadNodeImage(node, user, wg)
 	}
+
+	// Get avatar
+	downloadAvatar(user, data.EntryData.ProfilePage[0].User.ProfilePicURLHd)
+
 	fmt.Println(data.EntryData.ProfilePage[0].User.Username)
 }
 
 func prepareBox(user string) {
-	os.Mkdir(fmt.Sprintf("./%s", user), 0777)
-	os.Mkdir(fmt.Sprintf("./%s/img", user), 0777)
+	if err := os.Mkdir(fmt.Sprintf("./%s", user), 0777); err != nil {
+		log.Println(err)
+	}
+	if err := os.Mkdir(fmt.Sprintf("./%s/img", user), 0777); err != nil {
+		log.Println(err)
+	}
+	if err := os.Mkdir(fmt.Sprintf("./%s/avatar", user), 0777); err != nil {
+		log.Println(err)
+	}
 }
 
 func main() {
