@@ -17,7 +17,7 @@ import (
 
 //const sample = `<script type="text/javascript">window._sharedData = {"country_code": "TW"};</script>`
 var (
-	avataR  = regexp.MustCompile(`/s[0-9]+x[0-9]`)
+	sizeR   = regexp.MustCompile(`/[a-z][0-9]+x[0-9]`)
 	filterV = regexp.MustCompile(`<script type="text/javascript">window._sharedData = (.+);</script>`)
 	user    = flag.String("name", "", "ig id")
 )
@@ -125,7 +125,7 @@ func downloadNodeImage(node node, user string, wg *sync.WaitGroup) {
 		log.Fatal(err)
 	}
 	//fmt.Println(url.Path)
-	data, err := http.Get(node.DisplaySrc)
+	data, err := http.Get(sizeR.ReplaceAllString(node.DisplaySrc, ""))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -146,7 +146,7 @@ func downloadAvatar(user string, path string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	path = avataR.ReplaceAllString(path, "")
+	path = sizeR.ReplaceAllString(path, "")
 	data, err := http.Get(path)
 	if err != nil {
 		log.Fatal(err)
