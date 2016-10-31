@@ -17,7 +17,7 @@ import (
 
 //const sample = `<script type="text/javascript">window._sharedData = {"country_code": "TW"};</script>`
 var (
-	sizeR   = regexp.MustCompile(`/[a-z][0-9]+x[0-9]`)
+	sizeR   = regexp.MustCompile(`/[a-z][0-9]+x[0-9]+`)
 	filterV = regexp.MustCompile(`<script type="text/javascript">window._sharedData = (.+);</script>`)
 	user    = flag.String("name", "", "ig id")
 )
