@@ -45,22 +45,53 @@ func filter1(html io.Reader) []byte {
 }
 
 func parseJSON(data []byte) {
+	type node struct {
+		Caption          string `json:"caption"`
+		Code             string `json:"code"`
+		CommentsDisabled bool   `json:"comments_disabled"`
+		Date             int    `json:"date"`
+		DisplaySrc       string `json:"display_src"`
+		ID               string `json:"id"`
+		IsVideo          bool   `json:"is_video"`
+		ThumbnailSrc     string `json:"thumbnail_src"`
+		Comments         struct {
+			Count int `json:"Count"`
+		} `json:"comments"`
+		Dimensions struct {
+			Width  int `json:"width"`
+			Height int `json:"height"`
+		} `json:"dimensions"`
+		Likes struct {
+			Count int `json:"Count"`
+		} `json:"likes"`
+	}
+
 	type puser struct {
 		User struct {
-			Username string `json:"username"`
-			Follows  struct {
-				Count int `json:"count"`
-			} `json:"follows"`
-			FollowedBy struct {
+			Biography          string `json:"biography"`
+			FullName           string `json:"full_name"`
+			HasRequestedViewer bool   `json:"has_requested_viewer"`
+			ID                 string `json:"id"`
+			IsPrivate          bool   `json:"is_private"`
+			ProfilePicURL      string `json:"profile_pic_url"`
+			ProfilePicURLHd    string `json:"profile_pic_url_hd"`
+			Username           string `json:"username"`
+			FollowedBy         struct {
 				Count int `json:"count"`
 			} `json:"followed_by"`
-			HRV             bool   `json:"has_requested_viewer"`
-			ProfilePicURLHd string `json:"profile_pic_url_hd"`
-			ProfilePicURL   string `json:"profile_pic_url"`
-			ID              string `json:"id"`
-			Biography       string `json:"biography"`
-			FullName        string `json:"full_name"`
-			IsPrivate       bool   `json:"is_private"`
+			Follows struct {
+				Count int `json:"count"`
+			} `json:"follows"`
+			Media struct {
+				Count    int `json:"count"`
+				PageInfo struct {
+					EndCursor       string `json:"end_cursor"`
+					HasNextPage     bool   `json:"has_next_page"`
+					HasPreviousPage bool   `json:"has_previous_page"`
+					StartCursor     string `json:"start_cursor"`
+				} `json:"page_info"`
+				Nodes []node `json:"nodes"`
+			} `json:"media"`
 		} `json:"user"`
 	}
 
