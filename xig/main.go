@@ -69,6 +69,9 @@ type node struct {
 	Likes struct {
 		Count int `json:"Count"`
 	} `json:"likes"`
+	Owner struct {
+		ID string `json:"id"`
+	} `json:"owner"`
 }
 
 type media struct {
@@ -172,7 +175,7 @@ func downloadAvatar(user string, path string) {
 func fetchAll(id string, username string, endCursor string, count int, cookies *http.Cookie) {
 	v := url.Values{}
 	v.Set("q", fmt.Sprintf(`ig_user(%s) { media.after(%s, %d) {
-  cornt,
+  count,
   nodes {
     caption,
     code,
@@ -241,6 +244,18 @@ func fetchAll(id string, username string, endCursor string, count int, cookies *
 	wg.Wait()
 }
 
+func saveNodeContent(node node, user string, wg *sync.WaitGroup) {
+	jsonStr, err := json.Marshal(node)
+	if err != nil {
+		log.Fatal(err)
+	}
+	basePath := fmt.Sprintf("./%s/content/%d_%s_%s.%%s", user, node.Date, node.Code, node.ID)
+	if err := ioutil.WriteFile(fmt.Sprintf(basePath, "json"), jsonStr, 0777); err != nil {
+		log.Fatal(err)
+	}
+	wg.Done()
+}
+
 func dosomebad(user string) {
 	prepareBox(user)
 
@@ -251,12 +266,13 @@ func dosomebad(user string) {
 	//fmt.Printf("%+v\n", data)
 	var wg = &sync.WaitGroup{}
 	UserData := data.EntryData.ProfilePage[0].User
-	wg.Add(len(UserData.Media.Nodes))
+	wg.Add(len(UserData.Media.Nodes) * 2)
 	for _, node := range UserData.Media.Nodes {
 		//fmt.Println("-----")
 		//fmt.Printf("%d => %+v\n", i, node)
 		//fmt.Println("-----")
 		go downloadNodeImage(node, user, wg)
+		go saveNodeContent(node, user, wg)
 	}
 
 	// Get avatar
@@ -282,6 +298,9 @@ func prepareBox(user string) {
 		log.Println(err)
 	}
 	if err := os.Mkdir(fmt.Sprintf("./%s/avatar", user), 0777); err != nil {
+		log.Println(err)
+	}
+	if err := os.Mkdir(fmt.Sprintf("./%s/content", user), 0777); err != nil {
 		log.Println(err)
 	}
 }
