@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"time"
 )
 
 //const sample = `<script type="text/javascript">window._sharedData = {"country_code": "TW"};</script>`
@@ -234,12 +235,13 @@ func fetchAll(id string, username string, endCursor string, count int, cookies *
 	}
 
 	var wg = &sync.WaitGroup{}
-	wg.Add(len(data.Media.Nodes))
+	wg.Add(len(data.Media.Nodes) * 2)
 	for _, node := range data.Media.Nodes {
 		//fmt.Println("-----")
 		//fmt.Printf("%d => %+v\n", i, node)
 		//fmt.Println("-----")
 		go downloadNodeImage(node, username, wg)
+		go saveNodeContent(node, username, wg)
 	}
 	wg.Wait()
 }
@@ -253,6 +255,12 @@ func saveNodeContent(node node, user string, wg *sync.WaitGroup) {
 	if err := ioutil.WriteFile(fmt.Sprintf(basePath, "json"), jsonStr, 0777); err != nil {
 		log.Fatal(err)
 	}
+	readTime := time.Unix(int64(node.Date), 0).Format(time.RFC3339)
+	ioutil.WriteFile(fmt.Sprintf(basePath, "txt"),
+		[]byte(
+			fmt.Sprintf("Code: %s\nCaption: %s\nDate: %s\nDisplaySrc: %s\nID: %s",
+				node.Code, node.Caption, readTime, node.DisplaySrc, node.ID)),
+		0777)
 	wg.Done()
 }
 
@@ -282,7 +290,6 @@ func dosomebad(user string) {
 
 	if *getAll {
 		log.Println("Get all data!!!!")
-		fmt.Printf("%+v\n", fetchData.Cookies()[0].Name)
 		fetchAll(UserData.ID, UserData.Username, UserData.Media.PageInfo.EndCursor, UserData.Media.Count, fetchData.Cookies()[0])
 	}
 
