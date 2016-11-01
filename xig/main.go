@@ -19,15 +19,13 @@ import (
 var (
 	sizeR   = regexp.MustCompile(`/[a-z][0-9]+x[0-9]+`)
 	filterV = regexp.MustCompile(`<script type="text/javascript">window._sharedData = (.+);</script>`)
-	user    = flag.String("name", "", "ig id")
-	getAll  = flag.Bool("all", false, "Get All")
+	user    = flag.String("name", "", "IG username")
+	getAll  = flag.Bool("all", false, "Get all data")
 )
-
-const ig = `https://www.instagram.com/%s/?hl=zh-tw`
 
 func fetch(user string) *http.Response {
 	log.Printf("Fetch data from `%s`\n", user)
-	resp, err := http.Get(fmt.Sprintf(ig, user))
+	resp, err := http.Get(fmt.Sprintf(`https://www.instagram.com/%s/?hl=zh-tw`, user))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -128,11 +126,12 @@ func parseIndexJSON(data []byte) *IGData {
 
 func downloadNodeImage(node node, user string, wg *sync.WaitGroup) {
 	defer wg.Done()
-	url, err := url.Parse(node.DisplaySrc)
+	path := sizeR.ReplaceAllString(node.DisplaySrc, "")
+	url, err := url.Parse(path)
 	if err != nil {
 		log.Fatal(err)
 	}
-	data, err := http.Get(sizeR.ReplaceAllString(node.DisplaySrc, ""))
+	data, err := http.Get(path)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -149,11 +148,11 @@ func downloadNodeImage(node node, user string, wg *sync.WaitGroup) {
 }
 
 func downloadAvatar(user string, path string) {
+	path = sizeR.ReplaceAllString(path, "")
 	url, err := url.Parse(path)
 	if err != nil {
 		log.Fatal(err)
 	}
-	path = sizeR.ReplaceAllString(path, "")
 	data, err := http.Get(path)
 	if err != nil {
 		log.Fatal(err)
@@ -243,15 +242,14 @@ func saveNodeContent(node node, user string, wg *sync.WaitGroup) {
 		log.Fatal(err)
 	}
 	basePath := fmt.Sprintf("./%s/content/%d_%s_%s.%%s", user, node.Date, node.Code, node.ID)
-	if err := ioutil.WriteFile(fmt.Sprintf(basePath, "json"), jsonStr, 0777); err != nil {
+	if err := ioutil.WriteFile(fmt.Sprintf(basePath, "json"), jsonStr, 0644); err != nil {
 		log.Fatal(err)
 	}
-	readTime := time.Unix(int64(node.Date), 0).Format(time.RFC3339)
 	ioutil.WriteFile(fmt.Sprintf(basePath, "txt"),
 		[]byte(
 			fmt.Sprintf("Code: %s\nCaption: %s\nDate: %s\nDisplaySrc: %s\nID: %s",
-				node.Code, node.Caption, readTime, node.DisplaySrc, node.ID)),
-		0777)
+				node.Code, node.Caption, time.Unix(int64(node.Date), 0).Format(time.RFC3339), node.DisplaySrc, node.ID)),
+		0644)
 	log.Printf("Save content `%s`\n", node.Code)
 	wg.Done()
 }
@@ -281,8 +279,8 @@ func dosomebad(user string) {
 		fetchAll(UserData.ID, UserData.Username, UserData.Media.PageInfo.EndCursor, UserData.Media.Count, fetchData.Cookies()[0])
 	}
 
-	fmt.Println(UserData.Username)
-	fmt.Println(UserData.Media.Count)
+	fmt.Println("Username: ", UserData.Username)
+	fmt.Println("Count: ", UserData.Media.Count)
 }
 
 func prepareBox(user string) {
@@ -304,5 +302,7 @@ func main() {
 	flag.Parse()
 	if len(*user) > 0 {
 		dosomebad(*user)
+	} else {
+		flag.PrintDefaults()
 	}
 }
