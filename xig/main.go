@@ -261,6 +261,7 @@ func saveNodeContent(node node, user string, wg *sync.WaitGroup) {
 			fmt.Sprintf("Code: %s\nCaption: %s\nDate: %s\nDisplaySrc: %s\nID: %s",
 				node.Code, node.Caption, readTime, node.DisplaySrc, node.ID)),
 		0777)
+	log.Printf("Save content `%s`\n", node.Code)
 	wg.Done()
 }
 
