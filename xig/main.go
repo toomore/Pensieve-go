@@ -64,16 +64,10 @@ func downloadNodeImage(node node, user string, wg *sync.WaitGroup) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	data, err := http.Get(path)
+	err = downloadAndSave(path,
+		fmt.Sprintf("./%s/img/%s%s", user, node.Code, strings.Replace(url.Path, "/", "_", -1)))
+
 	if err != nil {
-		log.Fatal(err)
-	}
-	defer data.Body.Close()
-	body, err := ioutil.ReadAll(data.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err := ioutil.WriteFile(fmt.Sprintf("./%s/img/%s%s", user, node.Code, strings.Replace(url.Path, "/", "_", -1)), body, 0644); err != nil {
 		log.Fatal(err)
 	} else {
 		log.Println(fmt.Sprintf("Saved `%s`, `%s`", node.Code, node.DisplaySrc))
@@ -86,7 +80,18 @@ func downloadAvatar(user string, path string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	data, err := http.Get(path)
+	err = downloadAndSave(path,
+		fmt.Sprintf("./%s/avatar/%s", user, strings.Replace(url.Path, "/", "_", -1)))
+
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		log.Println(fmt.Sprintf("Saved `%s`, `%s`", user, path))
+	}
+}
+
+func downloadAndSave(url string, path string) error {
+	data, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,11 +100,7 @@ func downloadAvatar(user string, path string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := ioutil.WriteFile(fmt.Sprintf("./%s/avatar/%s", user, strings.Replace(url.Path, "/", "_", -1)), body, 0644); err != nil {
-		log.Fatal(err)
-	} else {
-		log.Println(fmt.Sprintf("Saved `%s`, `%s`", user, path))
-	}
+	return ioutil.WriteFile(path, body, 0644)
 }
 
 func fetchAll(id string, username string, endCursor string, count int, cookies *http.Cookie) {
