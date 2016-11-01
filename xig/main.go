@@ -47,74 +47,6 @@ func filter1(html io.Reader) []byte {
 	return nil
 }
 
-type node struct {
-	Caption          string `json:"caption"`
-	Code             string `json:"code"`
-	CommentsDisabled bool   `json:"comments_disabled"`
-	Date             int    `json:"date"`
-	DisplaySrc       string `json:"display_src"`
-	ID               string `json:"id"`
-	IsVideo          bool   `json:"is_video"`
-	ThumbnailSrc     string `json:"thumbnail_src"`
-	Comments         struct {
-		Count int `json:"Count"`
-	} `json:"comments"`
-	Dimensions struct {
-		Width  int `json:"width"`
-		Height int `json:"height"`
-	} `json:"dimensions"`
-	Likes struct {
-		Count int `json:"Count"`
-	} `json:"likes"`
-	Owner struct {
-		ID string `json:"id"`
-	} `json:"owner"`
-}
-
-type media struct {
-	Count    int    `json:"count"`
-	Nodes    []node `json:"nodes"`
-	PageInfo struct {
-		EndCursor       string `json:"end_cursor"`
-		HasNextPage     bool   `json:"has_next_page"`
-		HasPreviousPage bool   `json:"has_previous_page"`
-		StartCursor     string `json:"start_cursor"`
-	} `json:"page_info"`
-}
-
-type profilepage struct {
-	User struct {
-		Biography          string `json:"biography"`
-		FullName           string `json:"full_name"`
-		HasRequestedViewer bool   `json:"has_requested_viewer"`
-		ID                 string `json:"id"`
-		IsPrivate          bool   `json:"is_private"`
-		Media              media  `json:"media"`
-		ProfilePicURL      string `json:"profile_pic_url"`
-		ProfilePicURLHd    string `json:"profile_pic_url_hd"`
-		Username           string `json:"username"`
-		FollowedBy         struct {
-			Count int `json:"count"`
-		} `json:"followed_by"`
-		Follows struct {
-			Count int `json:"count"`
-		} `json:"follows"`
-	} `json:"user"`
-}
-
-// IGData struct
-type IGData struct {
-	Code      string `json:"country_code"`
-	EntryData struct {
-		ProfilePage []profilepage `json:"ProfilePage"`
-	} `json:"entry_data"`
-}
-
-type queryData struct {
-	Status string `json:"status"`
-	Media  media  `json:"media"`
-}
-
 func parseIndexJSON(data []byte) *IGData {
 	var r = &IGData{}
 	err := json.Unmarshal(data, &r)
@@ -126,6 +58,7 @@ func parseIndexJSON(data []byte) *IGData {
 
 func downloadNodeImage(node node, user string, wg *sync.WaitGroup) {
 	defer wg.Done()
+
 	path := sizeR.ReplaceAllString(node.DisplaySrc, "")
 	url, err := url.Parse(path)
 	if err != nil {
@@ -229,6 +162,7 @@ func fetchAll(id string, username string, endCursor string, count int, cookies *
 
 	var wg = &sync.WaitGroup{}
 	wg.Add(len(data.Media.Nodes) * 2)
+
 	for _, node := range data.Media.Nodes {
 		go downloadNodeImage(node, username, wg)
 		go saveNodeContent(node, username, wg)
@@ -237,6 +171,8 @@ func fetchAll(id string, username string, endCursor string, count int, cookies *
 }
 
 func saveNodeContent(node node, user string, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	jsonStr, err := json.Marshal(node)
 	if err != nil {
 		log.Fatal(err)
@@ -251,7 +187,6 @@ func saveNodeContent(node node, user string, wg *sync.WaitGroup) {
 				node.Code, node.Caption, time.Unix(int64(node.Date), 0).Format(time.RFC3339), node.DisplaySrc, node.ID)),
 		0644)
 	log.Printf("Save content `%s`\n", node.Code)
-	wg.Done()
 }
 
 func dosomebad(user string) {
@@ -260,27 +195,34 @@ func dosomebad(user string) {
 	// Get nodes
 	fetchData := fetch(user)
 	defer fetchData.Body.Close()
+
 	data := parseIndexJSON(filter1(fetchData.Body))
-	var wg = &sync.WaitGroup{}
-	UserData := data.EntryData.ProfilePage[0].User
-	wg.Add(len(UserData.Media.Nodes) * 2)
-	for _, node := range UserData.Media.Nodes {
-		go downloadNodeImage(node, user, wg)
-		go saveNodeContent(node, user, wg)
+
+	if !data.EntryData.ProfilePage[0].User.IsPrivate {
+		UserData := data.EntryData.ProfilePage[0].User
+
+		var wg = &sync.WaitGroup{}
+		wg.Add(len(UserData.Media.Nodes) * 2)
+
+		for _, node := range UserData.Media.Nodes {
+			go downloadNodeImage(node, user, wg)
+			go saveNodeContent(node, user, wg)
+		}
+
+		// Get avatar
+		downloadAvatar(user, UserData.ProfilePicURLHd)
+
+		wg.Wait()
+
+		if *getAll {
+			log.Println("Get all data!!!!")
+			fetchAll(UserData.ID, UserData.Username, UserData.Media.PageInfo.EndCursor, UserData.Media.Count, fetchData.Cookies()[0])
+		}
+
+		fmt.Println("Username: ", UserData.Username)
+		fmt.Println("Count: ", UserData.Media.Count)
 	}
 
-	// Get avatar
-	downloadAvatar(user, UserData.ProfilePicURLHd)
-
-	wg.Wait()
-
-	if *getAll {
-		log.Println("Get all data!!!!")
-		fetchAll(UserData.ID, UserData.Username, UserData.Media.PageInfo.EndCursor, UserData.Media.Count, fetchData.Cookies()[0])
-	}
-
-	fmt.Println("Username: ", UserData.Username)
-	fmt.Println("Count: ", UserData.Media.Count)
 }
 
 func prepareBox(user string) {
