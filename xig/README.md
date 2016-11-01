@@ -41,6 +41,7 @@ Note
 * Private user not work.
 * Content's readable date is in `RFC3339` format.
 * instagram won't to ban ip, may CDN doesn't check.
+* `xig`'s code base are not pretty, I will make it pretty :)
 
 Tips
 -----

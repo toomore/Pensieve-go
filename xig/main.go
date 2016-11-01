@@ -16,7 +16,6 @@ import (
 	"time"
 )
 
-//const sample = `<script type="text/javascript">window._sharedData = {"country_code": "TW"};</script>`
 var (
 	sizeR   = regexp.MustCompile(`/[a-z][0-9]+x[0-9]+`)
 	filterV = regexp.MustCompile(`<script type="text/javascript">window._sharedData = (.+);</script>`)
@@ -44,7 +43,6 @@ func filter1(html io.Reader) []byte {
 	if filterV.Match(data) {
 		log.Println("Finded!!")
 		for _, result := range filterV.FindAllSubmatch(data, -1) {
-			//log.Printf("%d => %s", i, result[1])
 			return result[1]
 		}
 	}
@@ -134,7 +132,6 @@ func downloadNodeImage(node node, user string, wg *sync.WaitGroup) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//fmt.Println(url.Path)
 	data, err := http.Get(sizeR.ReplaceAllString(node.DisplaySrc, ""))
 	if err != nil {
 		log.Fatal(err)
@@ -205,10 +202,8 @@ func fetchAll(id string, username string, endCursor string, count int, cookies *
 }
  }`, id, endCursor, count))
 	v.Set("ref", "users::show")
-	//v.Set("query_id", "17842962958175392")
 
 	client := &http.Client{}
-	//log.Fatal(v.Encode())
 	req, err := http.NewRequest("POST", "https://www.instagram.com/query/", strings.NewReader(v.Encode()))
 	if err != nil {
 		log.Fatal(err)
@@ -218,7 +213,6 @@ func fetchAll(id string, username string, endCursor string, count int, cookies *
 	req.Header.Set("x-csrftoken", cookies.Value)
 	req.AddCookie(cookies)
 
-	//data, err := http.PostForm("https://www.instagram.com/query/", v)
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatal(err)
@@ -237,9 +231,6 @@ func fetchAll(id string, username string, endCursor string, count int, cookies *
 	var wg = &sync.WaitGroup{}
 	wg.Add(len(data.Media.Nodes) * 2)
 	for _, node := range data.Media.Nodes {
-		//fmt.Println("-----")
-		//fmt.Printf("%d => %+v\n", i, node)
-		//fmt.Println("-----")
 		go downloadNodeImage(node, username, wg)
 		go saveNodeContent(node, username, wg)
 	}
@@ -272,14 +263,10 @@ func dosomebad(user string) {
 	fetchData := fetch(user)
 	defer fetchData.Body.Close()
 	data := parseIndexJSON(filter1(fetchData.Body))
-	//fmt.Printf("%+v\n", data)
 	var wg = &sync.WaitGroup{}
 	UserData := data.EntryData.ProfilePage[0].User
 	wg.Add(len(UserData.Media.Nodes) * 2)
 	for _, node := range UserData.Media.Nodes {
-		//fmt.Println("-----")
-		//fmt.Printf("%d => %+v\n", i, node)
-		//fmt.Println("-----")
 		go downloadNodeImage(node, user, wg)
 		go saveNodeContent(node, user, wg)
 	}
@@ -314,13 +301,8 @@ func prepareBox(user string) {
 }
 
 func main() {
-	//var v = regexp.MustCompile(r)
-	//fmt.Println(v.MatchString(sample))
-	//fmt.Println(v.FindAllStringSubmatch(sample, -1))
-
 	flag.Parse()
 	if len(*user) > 0 {
 		dosomebad(*user)
 	}
-
 }
