@@ -5,7 +5,7 @@ To fetch **instagram** user img, content, avatar data.
 install
 --------
 
-    go install -v github.com/toomore/Pensieve-go/xig
+    go install -v -a github.com/toomore/Pensieve-go/xig
 
 Usage
 ------
