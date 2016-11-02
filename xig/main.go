@@ -195,17 +195,21 @@ func saveBiography(data profile, wg *sync.WaitGroup) {
 	log.Printf("Save profile `%s` `%x`\n", data.Username, hex.Sum(nil))
 }
 
-func dosomebad(user string) {
-	prepareBox(user)
-
+func fetchRecently(username string) (*IGData, []*http.Cookie) {
 	// Get nodes
-	fetchData := fetch(user)
+	fetchData := fetch(username)
 	defer fetchData.Body.Close()
 
 	var data = &IGData{}
 	if err := json.Unmarshal(filter1(fetchData.Body), &data); err != nil {
 		log.Fatal(err)
 	}
+	return data, fetchData.Cookies()
+}
+
+func dosomebad(user string) {
+	prepareBox(user)
+	data, cookies := fetchRecently(user)
 
 	if !data.EntryData.ProfilePage[0].User.IsPrivate {
 		UserData := data.EntryData.ProfilePage[0].User
@@ -226,7 +230,7 @@ func dosomebad(user string) {
 
 		if *getAll {
 			log.Println("Get all data!!!!")
-			fetchAll(UserData.ID, UserData.Username, UserData.Media.PageInfo.EndCursor, UserData.Media.Count, fetchData.Cookies()[0])
+			fetchAll(UserData.ID, UserData.Username, UserData.Media.PageInfo.EndCursor, UserData.Media.Count, cookies[0])
 		}
 
 		fmt.Println("Username:", UserData.Username)
