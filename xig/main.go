@@ -48,15 +48,6 @@ func filter1(html io.Reader) []byte {
 	return nil
 }
 
-func parseIndexJSON(data []byte) *IGData {
-	var r = &IGData{}
-	err := json.Unmarshal(data, &r)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return r
-}
-
 func downloadNodeImage(node node, user string, wg *sync.WaitGroup) {
 	defer wg.Done()
 
@@ -70,9 +61,8 @@ func downloadNodeImage(node node, user string, wg *sync.WaitGroup) {
 
 	if err != nil {
 		log.Fatal(err)
-	} else {
-		log.Println(fmt.Sprintf("Saved `%s`, `%s`", node.Code, node.DisplaySrc))
 	}
+	log.Println(fmt.Sprintf("Saved `%s`, `%s`", node.Code, node.DisplaySrc))
 }
 
 func downloadAvatar(user string, path string, wg *sync.WaitGroup) {
@@ -88,9 +78,8 @@ func downloadAvatar(user string, path string, wg *sync.WaitGroup) {
 
 	if err != nil {
 		log.Fatal(err)
-	} else {
-		log.Println(fmt.Sprintf("Saved avatar `%s`, `%s`", user, path))
 	}
+	log.Println(fmt.Sprintf("Saved avatar `%s`, `%s`", user, path))
 }
 
 func downloadAndSave(url string, path string) error {
@@ -213,7 +202,10 @@ func dosomebad(user string) {
 	fetchData := fetch(user)
 	defer fetchData.Body.Close()
 
-	data := parseIndexJSON(filter1(fetchData.Body))
+	var data = &IGData{}
+	if err := json.Unmarshal(filter1(fetchData.Body), &data); err != nil {
+		log.Fatal(err)
+	}
 
 	if !data.EntryData.ProfilePage[0].User.IsPrivate {
 		UserData := data.EntryData.ProfilePage[0].User
