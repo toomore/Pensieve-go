@@ -22,6 +22,7 @@ var (
 	filterV = regexp.MustCompile(`<script type="text/javascript">window._sharedData = (.+);</script>`)
 	user    = flag.String("name", "", "IG username")
 	getAll  = flag.Bool("all", false, "Get all data")
+	qLook   = flag.Bool("i", false, "Quick look recently data")
 )
 
 func fetch(user string) *http.Response {
@@ -238,6 +239,21 @@ func dosomebad(user string) {
 	}
 }
 
+func quickLook(username string) {
+	data, _ := fetchRecently(username)
+	UserData := data.EntryData.ProfilePage[0].User
+	for i := len(UserData.Media.Nodes) - 1; i >= 0; i-- {
+		node := UserData.Media.Nodes[i]
+		fmt.Printf(`+----------+
+Code: https://www.instagram.com/p/%s Date: %s IsVideo: %t
+Caption: %s
+DisplaySrc: %s
+`,
+			node.Code, time.Unix(int64(node.Date), 0).Format(time.RFC3339),
+			node.IsVideo, node.Caption, node.DisplaySrc)
+	}
+}
+
 func prepareBox(user string) {
 	for _, path := range [5]string{"", "/img", "/avatar", "/content", "/profile"} {
 		if err := os.Mkdir(fmt.Sprintf("./%s%s", user, path), 0755); err != nil {
@@ -249,7 +265,12 @@ func prepareBox(user string) {
 func main() {
 	flag.Parse()
 	if len(*user) > 0 {
-		dosomebad(*user)
+		switch {
+		case *qLook:
+			quickLook(*user)
+		default:
+			dosomebad(*user)
+		}
 	} else {
 		flag.PrintDefaults()
 	}
