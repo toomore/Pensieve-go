@@ -240,24 +240,13 @@ func dosomebad(user string) {
 		fmt.Println("Username:", UserData.Username)
 		fmt.Println("Count:", UserData.Media.Count)
 	}
-
 }
 
 func prepareBox(user string) {
-	if err := os.Mkdir(fmt.Sprintf("./%s", user), 0777); err != nil {
-		log.Println(err)
-	}
-	if err := os.Mkdir(fmt.Sprintf("./%s/img", user), 0777); err != nil {
-		log.Println(err)
-	}
-	if err := os.Mkdir(fmt.Sprintf("./%s/avatar", user), 0777); err != nil {
-		log.Println(err)
-	}
-	if err := os.Mkdir(fmt.Sprintf("./%s/content", user), 0777); err != nil {
-		log.Println(err)
-	}
-	if err := os.Mkdir(fmt.Sprintf("./%s/profile", user), 0777); err != nil {
-		log.Println(err)
+	for _, path := range [5]string{"", "/img", "/avatar", "/content", "/profile"} {
+		if err := os.Mkdir(fmt.Sprintf("./%s%s", user, path), 0755); err != nil {
+			log.Println(err)
+		}
 	}
 }
 
