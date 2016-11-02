@@ -27,7 +27,8 @@ Print recently data
 Code: https://www.instagram.com/p/{code}
 Date: {date} IsVideo: {true|false}
 Caption: {caption}
-DisplaySrc: {url}```
+DisplaySrc: {url}
+```
 
 Fetch folder
 -------------
