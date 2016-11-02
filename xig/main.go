@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/md5"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -74,7 +75,9 @@ func downloadNodeImage(node node, user string, wg *sync.WaitGroup) {
 	}
 }
 
-func downloadAvatar(user string, path string) {
+func downloadAvatar(user string, path string, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	path = sizeR.ReplaceAllString(path, "")
 	url, err := url.Parse(path)
 	if err != nil {
@@ -190,6 +193,19 @@ func saveNodeContent(node node, user string, wg *sync.WaitGroup) {
 	log.Printf("Save content `%s`\n", node.Code)
 }
 
+func saveBiography(data profile, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	text := fmt.Sprintf("Username: %s\nFullName: %s\nID: %s\nIsPrivate: %t\nProfilePicURLHd: %s\nFollows: %d\nFollowsBy: %d\nBio: %s",
+		data.Username, data.FullName, data.ID, data.IsPrivate, data.ProfilePicURLHd,
+		data.Follows.Count, data.FollowedBy.Count, data.Biography)
+
+	hex := md5.New()
+	io.WriteString(hex, text)
+	ioutil.WriteFile(fmt.Sprintf("./%s/profile/%s_%x.txt", data.Username, data.Username, hex.Sum(nil)), []byte(text), 0644)
+	log.Printf("Save profile `%s` `%x`\n", data.Username, hex.Sum(nil))
+}
+
 func dosomebad(user string) {
 	prepareBox(user)
 
@@ -203,7 +219,7 @@ func dosomebad(user string) {
 		UserData := data.EntryData.ProfilePage[0].User
 
 		var wg = &sync.WaitGroup{}
-		wg.Add(len(UserData.Media.Nodes) * 2)
+		wg.Add(len(UserData.Media.Nodes)*2 + 2)
 
 		for _, node := range UserData.Media.Nodes {
 			go downloadNodeImage(node, user, wg)
@@ -211,7 +227,9 @@ func dosomebad(user string) {
 		}
 
 		// Get avatar
-		downloadAvatar(user, UserData.ProfilePicURLHd)
+		downloadAvatar(user, UserData.ProfilePicURLHd, wg)
+
+		saveBiography(UserData, wg)
 
 		wg.Wait()
 
@@ -220,8 +238,8 @@ func dosomebad(user string) {
 			fetchAll(UserData.ID, UserData.Username, UserData.Media.PageInfo.EndCursor, UserData.Media.Count, fetchData.Cookies()[0])
 		}
 
-		fmt.Println("Username: ", UserData.Username)
-		fmt.Println("Count: ", UserData.Media.Count)
+		fmt.Println("Username:", UserData.Username)
+		fmt.Println("Count:", UserData.Media.Count)
 	}
 
 }
@@ -237,6 +255,9 @@ func prepareBox(user string) {
 		log.Println(err)
 	}
 	if err := os.Mkdir(fmt.Sprintf("./%s/content", user), 0777); err != nil {
+		log.Println(err)
+	}
+	if err := os.Mkdir(fmt.Sprintf("./%s/profile", user), 0777); err != nil {
 		log.Println(err)
 	}
 }

@@ -35,24 +35,26 @@ type media struct {
 	} `json:"page_info"`
 }
 
+type profile struct {
+	Biography          string `json:"biography"`
+	FullName           string `json:"full_name"`
+	HasRequestedViewer bool   `json:"has_requested_viewer"`
+	ID                 string `json:"id"`
+	IsPrivate          bool   `json:"is_private"`
+	Media              media  `json:"media"`
+	ProfilePicURL      string `json:"profile_pic_url"`
+	ProfilePicURLHd    string `json:"profile_pic_url_hd"`
+	Username           string `json:"username"`
+	FollowedBy         struct {
+		Count int `json:"count"`
+	} `json:"followed_by"`
+	Follows struct {
+		Count int `json:"count"`
+	} `json:"follows"`
+}
+
 type profilepage struct {
-	User struct {
-		Biography          string `json:"biography"`
-		FullName           string `json:"full_name"`
-		HasRequestedViewer bool   `json:"has_requested_viewer"`
-		ID                 string `json:"id"`
-		IsPrivate          bool   `json:"is_private"`
-		Media              media  `json:"media"`
-		ProfilePicURL      string `json:"profile_pic_url"`
-		ProfilePicURLHd    string `json:"profile_pic_url_hd"`
-		Username           string `json:"username"`
-		FollowedBy         struct {
-			Count int `json:"count"`
-		} `json:"followed_by"`
-		Follows struct {
-			Count int `json:"count"`
-		} `json:"follows"`
-	} `json:"user"`
+	User profile `json:"user"`
 }
 
 // IGData struct
