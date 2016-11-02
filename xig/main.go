@@ -89,7 +89,7 @@ func downloadAvatar(user string, path string, wg *sync.WaitGroup) {
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		log.Println(fmt.Sprintf("Saved `%s`, `%s`", user, path))
+		log.Println(fmt.Sprintf("Saved avatar `%s`, `%s`", user, path))
 	}
 }
 
@@ -221,15 +221,14 @@ func dosomebad(user string) {
 		var wg = &sync.WaitGroup{}
 		wg.Add(len(UserData.Media.Nodes)*2 + 2)
 
+		// Get avatar
+		go downloadAvatar(user, UserData.ProfilePicURLHd, wg)
+		go saveBiography(UserData, wg)
+
 		for _, node := range UserData.Media.Nodes {
 			go downloadNodeImage(node, user, wg)
 			go saveNodeContent(node, user, wg)
 		}
-
-		// Get avatar
-		downloadAvatar(user, UserData.ProfilePicURLHd, wg)
-
-		saveBiography(UserData, wg)
 
 		wg.Wait()
 
