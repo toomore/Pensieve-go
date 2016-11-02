@@ -27,6 +27,8 @@ Fetch folder
 
 ```
 ./{username}
+├── profile
+│   └── {username}_{hash}.txt    // user profile, biography
 ├── avatar
 │   ├── {path1}.jpg              // user avatar image
 │   └── (...).jpg                // and more ... if put `xig` into cron jobs

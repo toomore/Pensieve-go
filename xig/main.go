@@ -243,8 +243,9 @@ func quickLook(username string) {
 	UserData := data.EntryData.ProfilePage[0].User
 	for i := len(UserData.Media.Nodes) - 1; i >= 0; i-- {
 		node := UserData.Media.Nodes[i]
-		fmt.Printf(`+----------+
-Code: https://www.instagram.com/p/%s Date: %s IsVideo: %t
+		fmt.Printf(`+----------------------------------------------------+
+Code: https://www.instagram.com/p/%s
+Date: %s IsVideo: %t
 Caption: %s
 DisplaySrc: %s
 `,
