@@ -12,11 +12,15 @@ Usage
 
 To fetch recently img(12), avatar and content
 
-    xig -name {username}
+    xig {username}
 
 To fetch **ALL** images data (if user uploaded more, may slow)
 
-    xig -name {username} -all
+    xig -a {username}
+
+Print recently data
+
+    xig -i {username}
 
 Fetch folder
 ------------

@@ -20,8 +20,7 @@ import (
 var (
 	sizeR   = regexp.MustCompile(`/[a-z][0-9]+x[0-9]+`)
 	filterV = regexp.MustCompile(`<script type="text/javascript">window._sharedData = (.+);</script>`)
-	user    = flag.String("name", "", "IG username")
-	getAll  = flag.Bool("all", false, "Get all data")
+	getAll  = flag.Bool("a", false, "Get all data")
 	qLook   = flag.Bool("i", false, "Quick look recently data")
 )
 
@@ -264,14 +263,16 @@ func prepareBox(user string) {
 
 func main() {
 	flag.Parse()
-	if len(*user) > 0 {
+	if len(flag.Args()) > 0 {
 		switch {
 		case *qLook:
-			quickLook(*user)
+			quickLook(flag.Arg(0))
 		default:
-			dosomebad(*user)
+			dosomebad(flag.Arg(0))
 		}
 	} else {
+		fmt.Println("xig [options] {username}")
+		fmt.Println("Options:")
 		flag.PrintDefaults()
 	}
 }
