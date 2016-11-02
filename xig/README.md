@@ -22,8 +22,15 @@ Print recently data
 
     xig -i {username}
 
+```
++----------------------------------------------------+
+Code: https://www.instagram.com/p/{code}
+Date: {date} IsVideo: {true|false}
+Caption: {caption}
+DisplaySrc: {url}```
+
 Fetch folder
-------------
+-------------
 
 ```
 ./{username}
