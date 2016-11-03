@@ -189,10 +189,9 @@ func saveBiography(data profile, wg *sync.WaitGroup) {
 		data.Username, data.FullName, data.ID, data.IsPrivate, data.ProfilePicURLHd,
 		data.Follows.Count, data.FollowedBy.Count, data.Biography)
 
-	hex := md5.New()
-	io.WriteString(hex, text)
-	ioutil.WriteFile(fmt.Sprintf("./%s/profile/%s_%x.txt", data.Username, data.Username, hex.Sum(nil)), []byte(text), 0644)
-	log.Printf("Save profile `%s` `%x`\n", data.Username, hex.Sum(nil))
+	hex := md5.Sum([]byte(text))
+	ioutil.WriteFile(fmt.Sprintf("./%s/profile/%s_%x.txt", data.Username, data.Username, hex), []byte(text), 0644)
+	log.Printf("Save profile `%s` `%x`\n", data.Username, hex)
 }
 
 func fetchRecently(username string) (*IGData, []*http.Cookie) {
