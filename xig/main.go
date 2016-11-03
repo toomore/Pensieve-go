@@ -211,10 +211,10 @@ func dosomebad(user string) {
 	prepareBox(user)
 	data, cookies := fetchRecently(user)
 
+	var wg = &sync.WaitGroup{}
 	if !data.EntryData.ProfilePage[0].User.IsPrivate {
 		UserData := data.EntryData.ProfilePage[0].User
 
-		var wg = &sync.WaitGroup{}
 		wg.Add(len(UserData.Media.Nodes)*2 + 2)
 
 		// Get avatar
@@ -235,6 +235,10 @@ func dosomebad(user string) {
 
 		fmt.Println("Username:", UserData.Username)
 		fmt.Println("Count:", UserData.Media.Count)
+	} else {
+		wg.Add(1)
+		go downloadAvatar(user, data.EntryData.ProfilePage[0].User.ProfilePicURLHd, wg)
+		wg.Wait()
 	}
 }
 
