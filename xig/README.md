@@ -62,4 +62,4 @@ Tips
 
 For crontab, every 1m to fetch
 
-    */1 * * * * cd ~/{some folder}; ({$go_bin_path}/xig -name {username} 2>&1) >> ./{username}.log
+    */1 * * * * cd ~/{some folder}; ({$go_bin_path}/xig {username} 2>&1) >> ./{username}.log
