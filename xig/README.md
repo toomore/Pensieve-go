@@ -38,13 +38,13 @@ Fetch folder
 ├── profile
 │   └── {username}_{hash}.txt    // user profile, biography
 ├── avatar
-│   ├── {path1}.jpg              // user avatar image
+│   ├── {username}_{hash}.jpg    // user avatar image
 │   └── (...).jpg                // and more ... if put `xig` into cron jobs
 ├── content
 │   ├── {date}_{code}_{id}.json  // json files, for some day `xig` reuse
 │   └── {date}_{code}_{id}.txt   // for human readable content
 └── img
-    ├── {code}_{path1}.jpg       // user uploaded images
+    ├── {code}_{hash}.jpg        // user uploaded images
     └── (...).jpg                // and more ...
 ```
 
