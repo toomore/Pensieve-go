@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -57,7 +58,9 @@ func downloadNodeImage(node node, user string, wg *sync.WaitGroup) {
 		log.Fatal(err)
 	}
 	err = downloadAndSave(path,
-		fmt.Sprintf("./%s/img/%s%s", user, node.Code, strings.Replace(url.Path, "/", "_", -1)))
+		fmt.Sprintf("./%s/img/%s_%%x%s", user, node.Code, filepath.Ext(url.Path)),
+		true,
+	)
 
 	if err != nil {
 		log.Fatal(err)
@@ -74,7 +77,9 @@ func downloadAvatar(user string, path string, wg *sync.WaitGroup) {
 		log.Fatal(err)
 	}
 	err = downloadAndSave(path,
-		fmt.Sprintf("./%s/avatar/%s", user, strings.Replace(url.Path, "/", "_", -1)))
+		fmt.Sprintf("./%s/avatar/%s_%%x%s", user, user, filepath.Ext(url.Path)),
+		true,
+	)
 
 	if err != nil {
 		log.Fatal(err)
@@ -82,7 +87,7 @@ func downloadAvatar(user string, path string, wg *sync.WaitGroup) {
 	log.Println(fmt.Sprintf("Saved avatar `%s`, `%s`", user, path))
 }
 
-func downloadAndSave(url string, path string) error {
+func downloadAndSave(url string, path string, withHex bool) error {
 	data, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
@@ -91,6 +96,9 @@ func downloadAndSave(url string, path string) error {
 	body, err := ioutil.ReadAll(data.Body)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if withHex {
+		path = fmt.Sprintf(path, md5.Sum(body))
 	}
 	return ioutil.WriteFile(path, body, 0644)
 }
