@@ -100,6 +100,10 @@ func downloadAndSave(url string, path string, withHex bool) error {
 	if withHex {
 		path = fmt.Sprintf(path, md5.Sum(body))
 	}
+	if _, err := os.Stat(path); err == nil {
+		log.Println("File existed:", path)
+		return nil
+	}
 	return ioutil.WriteFile(path, body, 0644)
 }
 
