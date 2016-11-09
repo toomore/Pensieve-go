@@ -104,6 +104,7 @@ func downloadAndSave(url string, path string, withHex bool) error {
 		log.Println("File existed:", path)
 		return nil
 	}
+	log.Printf("[O] Save `%s`\n", path)
 	return ioutil.WriteFile(path, body, 0644)
 }
 
@@ -187,6 +188,7 @@ func saveNodeContent(node node, user string, wg *sync.WaitGroup) {
 		if err := ioutil.WriteFile(fmt.Sprintf(basePath, "json"), jsonStr, 0644); err != nil {
 			log.Fatal(err)
 		}
+		log.Printf("[O] Save content.json `%s`\n", node.Code)
 	} else {
 		log.Println("Content `json` existed", node.Code)
 	}
@@ -197,7 +199,7 @@ func saveNodeContent(node node, user string, wg *sync.WaitGroup) {
 				fmt.Sprintf("Code: %s\nCaption: %s\nDate: %s\nDisplaySrc: %s\nID: %s",
 					node.Code, node.Caption, time.Unix(int64(node.Date), 0).Format(time.RFC3339), node.DisplaySrc, node.ID)),
 			0644)
-		log.Printf("Save content `%s`\n", node.Code)
+		log.Printf("[O] Save content.txt `%s`\n", node.Code)
 	} else {
 		log.Println("Content `txt` existed", node.Code)
 	}
