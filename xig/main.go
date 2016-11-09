@@ -183,15 +183,24 @@ func saveNodeContent(node node, user string, wg *sync.WaitGroup) {
 		log.Fatal(err)
 	}
 	basePath := fmt.Sprintf("./%s/content/%d_%s_%s.%%s", user, node.Date, node.Code, node.ID)
-	if err := ioutil.WriteFile(fmt.Sprintf(basePath, "json"), jsonStr, 0644); err != nil {
-		log.Fatal(err)
+	if _, err := os.Stat(fmt.Sprintf(basePath, "json")); err != nil {
+		if err := ioutil.WriteFile(fmt.Sprintf(basePath, "json"), jsonStr, 0644); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		log.Println("Content `json` existed", node.Code)
 	}
-	ioutil.WriteFile(fmt.Sprintf(basePath, "txt"),
-		[]byte(
-			fmt.Sprintf("Code: %s\nCaption: %s\nDate: %s\nDisplaySrc: %s\nID: %s",
-				node.Code, node.Caption, time.Unix(int64(node.Date), 0).Format(time.RFC3339), node.DisplaySrc, node.ID)),
-		0644)
-	log.Printf("Save content `%s`\n", node.Code)
+
+	if _, err := os.Stat(fmt.Sprintf(basePath, "txt")); err != nil {
+		ioutil.WriteFile(fmt.Sprintf(basePath, "txt"),
+			[]byte(
+				fmt.Sprintf("Code: %s\nCaption: %s\nDate: %s\nDisplaySrc: %s\nID: %s",
+					node.Code, node.Caption, time.Unix(int64(node.Date), 0).Format(time.RFC3339), node.DisplaySrc, node.ID)),
+			0644)
+		log.Printf("Save content `%s`\n", node.Code)
+	} else {
+		log.Println("Content `txt` existed", node.Code)
+	}
 }
 
 func saveBiography(data profile, wg *sync.WaitGroup) {
