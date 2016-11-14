@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -146,7 +147,16 @@ func fetchAll(id string, username string, endCursor string, count int, cookies *
  }`, id, endCursor, count))
 	v.Set("ref", "users::show")
 
-	client := &http.Client{}
+	client := &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			DialContext: (&net.Dialer{
+				Timeout:   0,
+				KeepAlive: 0,
+			}).DialContext,
+			TLSHandshakeTimeout: 1 * time.Second,
+		},
+	}
 	req, err := http.NewRequest("POST", "https://www.instagram.com/query/", strings.NewReader(v.Encode()))
 	if err != nil {
 		log.Fatal(err)
@@ -184,8 +194,9 @@ func fetchAll(id string, username string, endCursor string, count int, cookies *
 
 	go func() {
 		for node := range queue {
-			go downloadNodeImage(node, username, wg)
-			go saveNodeContent(node, username, wg)
+			runtime.Gosched()
+			downloadNodeImage(node, username, wg)
+			saveNodeContent(node, username, wg)
 		}
 	}()
 
@@ -269,8 +280,9 @@ func dosomebad(user string) {
 
 		go func() {
 			for node := range queue {
-				go downloadNodeImage(node, user, wg)
-				go saveNodeContent(node, user, wg)
+				runtime.Gosched()
+				downloadNodeImage(node, user, wg)
+				saveNodeContent(node, user, wg)
 			}
 		}()
 
