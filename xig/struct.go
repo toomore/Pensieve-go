@@ -1,6 +1,7 @@
 package main
 
-type node struct {
+// Node struct
+type Node struct {
 	Caption          string `json:"caption"`
 	Code             string `json:"code"`
 	CommentsDisabled bool   `json:"comments_disabled"`
@@ -26,7 +27,7 @@ type node struct {
 
 type media struct {
 	Count    int    `json:"count"`
-	Nodes    []node `json:"nodes"`
+	Nodes    []Node `json:"nodes"`
 	PageInfo struct {
 		EndCursor       string `json:"end_cursor"`
 		HasNextPage     bool   `json:"has_next_page"`

@@ -13,15 +13,17 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
 )
 
 var (
-	sizeR   = regexp.MustCompile(`/[a-z][0-9]+x[0-9]+`)
 	filterV = regexp.MustCompile(`<script type="text/javascript">window._sharedData = (.+);</script>`)
+	sizeR   = regexp.MustCompile(`/[a-z][0-9]+x[0-9]+`)
 	getAll  = flag.Bool("a", false, "Get all data")
+	ncpu    = flag.Int("c", runtime.NumCPU(), "concurrency nums")
 	qLook   = flag.Bool("i", false, "Quick look recently data")
 )
 
@@ -49,7 +51,7 @@ func filter1(html io.Reader) []byte {
 	return nil
 }
 
-func downloadNodeImage(node node, user string, wg *sync.WaitGroup) {
+func downloadNodeImage(node Node, user string, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	path := sizeR.ReplaceAllString(node.DisplaySrc, "")
@@ -92,10 +94,13 @@ func downloadAndSave(url string, path string, withHex bool) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer data.Body.Close()
 	body, err := ioutil.ReadAll(data.Body)
+
+	data.Body.Close()
+
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return err
 	}
 	if withHex {
 		path = fmt.Sprintf(path, md5.Sum(body))
@@ -169,14 +174,26 @@ func fetchAll(id string, username string, endCursor string, count int, cookies *
 	var wg = &sync.WaitGroup{}
 	wg.Add(len(data.Media.Nodes) * 2)
 
+	queue := make(chan Node, *ncpu)
+
 	for _, node := range data.Media.Nodes {
-		go downloadNodeImage(node, username, wg)
-		go saveNodeContent(node, username, wg)
+		go func(node Node) {
+			queue <- node
+		}(node)
 	}
+
+	go func() {
+		for node := range queue {
+			go downloadNodeImage(node, username, wg)
+			go saveNodeContent(node, username, wg)
+		}
+	}()
+
 	wg.Wait()
+	close(queue)
 }
 
-func saveNodeContent(node node, user string, wg *sync.WaitGroup) {
+func saveNodeContent(node Node, user string, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	jsonStr, err := json.Marshal(node)
@@ -243,12 +260,22 @@ func dosomebad(user string) {
 		go downloadAvatar(user, UserData.ProfilePicURLHd, wg)
 		go saveBiography(UserData, wg)
 
+		queue := make(chan Node, *ncpu)
 		for _, node := range UserData.Media.Nodes {
-			go downloadNodeImage(node, user, wg)
-			go saveNodeContent(node, user, wg)
+			go func(node Node) {
+				queue <- node
+			}(node)
 		}
 
+		go func() {
+			for node := range queue {
+				go downloadNodeImage(node, user, wg)
+				go saveNodeContent(node, user, wg)
+			}
+		}()
+
 		wg.Wait()
+		close(queue)
 
 		if *getAll {
 			log.Println("Get all data!!!!")
