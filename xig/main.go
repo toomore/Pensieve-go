@@ -53,6 +53,7 @@ func filter1(html io.Reader) []byte {
 }
 
 func downloadNodeImage(node Node, user string, wg *sync.WaitGroup) {
+	runtime.Gosched()
 	defer wg.Done()
 
 	path := sizeR.ReplaceAllString(node.DisplaySrc, "")
@@ -184,27 +185,34 @@ func fetchAll(id string, username string, endCursor string, count int, cookies *
 	var wg = &sync.WaitGroup{}
 	wg.Add(len(data.Media.Nodes) * 2)
 
-	queue := make(chan Node, *ncpu)
+	queueImg := make(chan Node, *ncpu)
+	queueCon := make(chan Node, *ncpu)
 
 	for _, node := range data.Media.Nodes {
 		go func(node Node) {
-			queue <- node
+			queueImg <- node
+			queueCon <- node
 		}(node)
 	}
 
 	go func() {
-		for node := range queue {
-			runtime.Gosched()
+		for node := range queueImg {
 			downloadNodeImage(node, username, wg)
+		}
+	}()
+	go func() {
+		for node := range queueCon {
 			saveNodeContent(node, username, wg)
 		}
 	}()
 
 	wg.Wait()
-	close(queue)
+	close(queueImg)
+	close(queueCon)
 }
 
 func saveNodeContent(node Node, user string, wg *sync.WaitGroup) {
+	runtime.Gosched()
 	defer wg.Done()
 
 	jsonStr, err := json.Marshal(node)
@@ -271,23 +279,29 @@ func dosomebad(user string) {
 		go downloadAvatar(user, UserData.ProfilePicURLHd, wg)
 		go saveBiography(UserData, wg)
 
-		queue := make(chan Node, *ncpu)
+		queueImg := make(chan Node, *ncpu)
+		queueCon := make(chan Node, *ncpu)
 		for _, node := range UserData.Media.Nodes {
 			go func(node Node) {
-				queue <- node
+				queueImg <- node
+				queueCon <- node
 			}(node)
 		}
 
 		go func() {
-			for node := range queue {
-				runtime.Gosched()
-				downloadNodeImage(node, user, wg)
-				saveNodeContent(node, user, wg)
+			for node := range queueImg {
+				go downloadNodeImage(node, user, wg)
+			}
+		}()
+		go func() {
+			for node := range queueCon {
+				go saveNodeContent(node, user, wg)
 			}
 		}()
 
 		wg.Wait()
-		close(queue)
+		close(queueImg)
+		close(queueCon)
 
 		if *getAll {
 			log.Println("Get all data!!!!")
