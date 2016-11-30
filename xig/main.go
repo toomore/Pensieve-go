@@ -265,7 +265,7 @@ func fetchRecently(username string) (*IGData, []*http.Cookie) {
 	return data, fetchData.Cookies()
 }
 
-func dosomebad(user string) {
+func start(user string) {
 	prepareBox(user)
 	data, cookies := fetchRecently(user)
 
@@ -349,7 +349,7 @@ func main() {
 		case *qLook:
 			quickLook(flag.Arg(0))
 		default:
-			dosomebad(flag.Arg(0))
+			start(flag.Arg(0))
 		}
 	} else {
 		fmt.Println("xig [options] {username}")
