@@ -23,6 +23,7 @@ import (
 var (
 	filterV = regexp.MustCompile(`<script type="text/javascript">window._sharedData = (.+);</script>`)
 	sizeR   = regexp.MustCompile(`/[a-z][0-9]+x[0-9]+`)
+	delay   = flag.Int64("d", 0, "Delay to start")
 	getAll  = flag.Bool("a", false, "Get all data")
 	ncpu    = flag.Int("c", runtime.NumCPU(), "concurrency nums")
 	qLook   = flag.Bool("i", false, "Quick look recently data")
@@ -349,6 +350,8 @@ func main() {
 		case *qLook:
 			quickLook(flag.Arg(0))
 		default:
+			log.Printf("Delay: %ds", *delay)
+			time.Sleep(time.Duration(*delay) * time.Second)
 			start(flag.Arg(0))
 		}
 	} else {
