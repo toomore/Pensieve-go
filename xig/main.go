@@ -350,23 +350,47 @@ func findContantJSON(username string) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	for i, path := range allJSON {
+	var wg sync.WaitGroup
+	limit := make(chan struct{}, *ncpu)
+	result := make([]string, 0)
+
+	wg.Add(len(allJSON))
+	for _, path := range allJSON {
 		data, err := ioutil.ReadFile(path)
 		if err != nil {
 			log.Fatal(err)
 		}
 		var node Node
 		json.Unmarshal(data, &node)
-		log.Printf("%d => %s %t\n", i, node.Code, page404(node.Code))
+
+		go func(node Node) {
+			defer wg.Done()
+			limit <- struct{}{}
+			if page404(node.Code) {
+				result = append(result, fmt.Sprintf("404 => %s", node.Code))
+			}
+			fmt.Printf("%s", ".")
+			<-limit
+		}(node)
 	}
+	wg.Wait()
+	if len(result) > 0 {
+		fmt.Println()
+		for i, v := range result {
+			fmt.Println(i, v)
+		}
+	}
+	log.Println("Done")
 }
 
 func page404(code string) bool {
 	resp, err := http.Get(fmt.Sprintf("https://www.instagram.com/p/%s", code))
-	if err != nil {
-		if resp.StatusCode == 400 {
+	if err == nil {
+		if resp.StatusCode == http.StatusNotFound {
 			return true
 		}
+	} else {
+		log.Println(code, err)
 	}
 	return false
 }

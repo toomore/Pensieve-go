@@ -30,6 +30,10 @@ Caption: {caption}
 DisplaySrc: {url}
 ```
 
+To find some deleted content
+
+    xig -f {username}
+
 Fetch folder
 -------------
 
