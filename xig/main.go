@@ -23,7 +23,9 @@ import (
 var (
 	filterV = regexp.MustCompile(`<script type="text/javascript">window._sharedData = (.+);</script>`)
 	sizeR   = regexp.MustCompile(`/[a-z][0-9]+x[0-9]+`)
+
 	delay   = flag.Int64("d", 0, "Delay to start")
+	finddel = flag.Bool("f", false, "Find deleted")
 	getAll  = flag.Bool("a", false, "Get all data")
 	ncpu    = flag.Int("c", runtime.NumCPU(), "concurrency nums")
 	qLook   = flag.Bool("i", false, "Quick look recently data")
@@ -343,10 +345,39 @@ func prepareBox(user string) {
 	}
 }
 
+func findContantJSON(username string) {
+	allJSON, err := filepath.Glob(fmt.Sprintf("./%s/content/*.json", username))
+	if err != nil {
+		log.Fatalln(err)
+	}
+	for i, path := range allJSON {
+		data, err := ioutil.ReadFile(path)
+		if err != nil {
+			log.Fatal(err)
+		}
+		var node Node
+		json.Unmarshal(data, &node)
+		log.Printf("%d => %s %t\n", i, node.Code, page404(node.Code))
+	}
+}
+
+func page404(code string) bool {
+	resp, err := http.Get(fmt.Sprintf("https://www.instagram.com/p/%s", code))
+	if err != nil {
+		if resp.StatusCode == 400 {
+			return true
+		}
+	}
+	return false
+}
+
 func main() {
 	flag.Parse()
 	if len(flag.Args()) > 0 {
 		switch {
+		case *finddel:
+			log.Println("To find deleted", flag.Arg(0))
+			findContantJSON(flag.Arg(0))
 		case *qLook:
 			quickLook(flag.Arg(0))
 		default:
