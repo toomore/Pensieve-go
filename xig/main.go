@@ -355,6 +355,7 @@ func findContantJSON(username string) {
 	result := make([]string, len(allJSON))
 
 	wg.Add(len(allJSON))
+	starttime := time.Now()
 	for i, path := range allJSON {
 		data, err := ioutil.ReadFile(path)
 		if err != nil {
@@ -371,18 +372,20 @@ func findContantJSON(username string) {
 			if err == nil {
 				if resp.StatusCode > 300 || resp.StatusCode < 200 {
 					result[i] = fmt.Sprintf("%d => %s", resp.StatusCode, node.Code)
-					fmt.Printf("%s", "!")
+					fmt.Printf("%s", "x")
 				} else {
 					fmt.Printf("%s", ".")
 				}
 			} else {
-				log.Println(node.Code, err)
+				fmt.Printf("%s", "!")
+				result[i] = fmt.Sprintf("[Err] %s => %s", node.Code, err)
 			}
 
 			<-limit
 		}(i, node)
 	}
 	wg.Wait()
+	done := time.Since(starttime)
 	fmt.Println()
 	var num int
 	for _, v := range result {
@@ -391,7 +394,7 @@ func findContantJSON(username string) {
 			num++
 		}
 	}
-	log.Println("Done")
+	log.Println("Done", done)
 }
 
 func pageNotFound(code string) bool {
