@@ -370,7 +370,7 @@ func findContantJSON(username string) {
 			resp, err := http.Get(fmt.Sprintf("https://www.instagram.com/p/%s", node.Code))
 			if err == nil {
 				if resp.StatusCode > 300 || resp.StatusCode < 200 {
-					result[i] = fmt.Sprintf("404 => %s", node.Code)
+					result[i] = fmt.Sprintf("%d => %s", resp.StatusCode, node.Code)
 					fmt.Printf("%s", "!")
 				} else {
 					fmt.Printf("%s", ".")
@@ -384,9 +384,11 @@ func findContantJSON(username string) {
 	}
 	wg.Wait()
 	fmt.Println()
-	for i, v := range result {
+	var num int
+	for _, v := range result {
 		if v != "" {
-			fmt.Println(i, v)
+			fmt.Println(num, v)
+			num++
 		}
 	}
 	log.Println("Done")
