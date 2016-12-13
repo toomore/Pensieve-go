@@ -352,10 +352,10 @@ func findContantJSON(username string) {
 	}
 	var wg sync.WaitGroup
 	limit := make(chan struct{}, *ncpu)
-	result := make([]string, 0)
+	result := make([]string, len(allJSON))
 
 	wg.Add(len(allJSON))
-	for _, path := range allJSON {
+	for i, path := range allJSON {
 		data, err := ioutil.ReadFile(path)
 		if err != nil {
 			log.Fatal(err)
@@ -363,30 +363,39 @@ func findContantJSON(username string) {
 		var node Node
 		json.Unmarshal(data, &node)
 
-		go func(node Node) {
+		go func(i int, node Node) {
 			defer wg.Done()
 			limit <- struct{}{}
-			if page404(node.Code) {
-				result = append(result, fmt.Sprintf("404 => %s", node.Code))
+
+			resp, err := http.Get(fmt.Sprintf("https://www.instagram.com/p/%s", node.Code))
+			if err == nil {
+				if resp.StatusCode > 300 || resp.StatusCode < 200 {
+					result[i] = fmt.Sprintf("404 => %s", node.Code)
+					fmt.Printf("%s", "!")
+				} else {
+					fmt.Printf("%s", ".")
+				}
+			} else {
+				log.Println(node.Code, err)
 			}
-			fmt.Printf("%s", ".")
+
 			<-limit
-		}(node)
+		}(i, node)
 	}
 	wg.Wait()
-	if len(result) > 0 {
-		fmt.Println()
-		for i, v := range result {
+	fmt.Println()
+	for i, v := range result {
+		if v != "" {
 			fmt.Println(i, v)
 		}
 	}
 	log.Println("Done")
 }
 
-func page404(code string) bool {
+func pageNotFound(code string) bool {
 	resp, err := http.Get(fmt.Sprintf("https://www.instagram.com/p/%s", code))
 	if err == nil {
-		if resp.StatusCode == http.StatusNotFound {
+		if resp.StatusCode > 300 || resp.StatusCode < 200 {
 			return true
 		}
 	} else {
