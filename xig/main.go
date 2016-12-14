@@ -345,7 +345,7 @@ func prepareBox(user string) {
 	}
 }
 
-func findContantJSON(username string) {
+func findContentJSON(username string) {
 	allJSON, err := filepath.Glob(fmt.Sprintf("./%s/content/*.json", username))
 	if err != nil {
 		log.Fatalln(err)
@@ -415,7 +415,7 @@ func main() {
 		switch {
 		case *finddel:
 			log.Println("To find deleted", flag.Arg(0))
-			findContantJSON(flag.Arg(0))
+			findContentJSON(flag.Arg(0))
 		case *qLook:
 			quickLook(flag.Arg(0))
 		default:
