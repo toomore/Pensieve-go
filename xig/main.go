@@ -372,7 +372,7 @@ func findContentJSON(username string) {
 			resp, err := http.Get(fmt.Sprintf("https://www.instagram.com/p/%s", node.Code))
 			if err == nil {
 				if resp.StatusCode > 300 || resp.StatusCode < 200 {
-					result[i] = fmt.Sprintf("%d => %s", resp.StatusCode, node.Code)
+					result[i] = fmt.Sprintf("%d => %d %s", resp.StatusCode, node.Date, node.Code)
 					fmt.Printf("%s", "x")
 				} else {
 					fmt.Printf("%s", ".")
