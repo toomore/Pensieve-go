@@ -357,16 +357,17 @@ func findContentJSON(username string) {
 	wg.Add(len(allJSON))
 	starttime := time.Now()
 	for i, path := range allJSON {
-		data, err := ioutil.ReadFile(path)
-		if err != nil {
-			log.Fatal(err)
-		}
-		var node Node
-		json.Unmarshal(data, &node)
-
-		go func(i int, node Node) {
+		go func(i int, path string) {
 			defer wg.Done()
 			limit <- struct{}{}
+
+			data, err := ioutil.ReadFile(path)
+			if err != nil {
+				log.Println("Open files:", err)
+				return
+			}
+			var node Node
+			json.Unmarshal(data, &node)
 
 			resp, err := http.Get(fmt.Sprintf("https://www.instagram.com/p/%s", node.Code))
 			if err == nil {
@@ -382,7 +383,7 @@ func findContentJSON(username string) {
 			}
 
 			<-limit
-		}(i, node)
+		}(i, path)
 	}
 	wg.Wait()
 	done := time.Since(starttime)
@@ -395,18 +396,6 @@ func findContentJSON(username string) {
 		}
 	}
 	log.Println("Done", done)
-}
-
-func pageNotFound(code string) bool {
-	resp, err := http.Get(fmt.Sprintf("https://www.instagram.com/p/%s", code))
-	if err == nil {
-		if resp.StatusCode > 300 || resp.StatusCode < 200 {
-			return true
-		}
-	} else {
-		log.Println(code, err)
-	}
-	return false
 }
 
 func main() {
