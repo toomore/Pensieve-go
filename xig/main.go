@@ -27,7 +27,7 @@ var (
 	delay   = flag.Int64("d", 0, "Delay to start")
 	finddel = flag.Bool("f", false, "Find deleted")
 	getAll  = flag.Bool("a", false, "Get all data")
-	ncpu    = flag.Int("c", runtime.NumCPU(), "concurrency nums")
+	ncpu    = flag.Int("c", runtime.NumCPU()*20, "concurrency nums")
 	qLook   = flag.Bool("i", false, "Quick look recently data")
 )
 
