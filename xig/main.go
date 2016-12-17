@@ -30,14 +30,17 @@ var (
 	delay     = flag.Int64("d", 0, "Delay to start")
 	finddel   = flag.Bool("f", false, "Find deleted")
 	getAll    = flag.Bool("a", false, "Get all data")
-	loginuser = flag.Bool("u", false, "Login user")
+	loginuser = flag.Bool("u", false, "Login someone to see private data")
 	ncpu      = flag.Int("c", runtime.NumCPU()*20, "concurrency nums")
 	qLook     = flag.Bool("i", false, "Quick look recently data")
 )
 
 func fetch(user string) *http.Response {
 	log.Printf("Fetch data from `%s`\n", user)
-	resp, err := http.Get(fmt.Sprintf(`https://www.instagram.com/%s/?hl=zh-tw`, user))
+	client := &http.Client{
+		Jar: cookieJar,
+	}
+	resp, err := client.Get(fmt.Sprintf(`https://www.instagram.com/%s/?hl=zh-tw`, user))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -122,7 +125,7 @@ func downloadAndSave(url string, path string, withHex bool) error {
 	return ioutil.WriteFile(path, body, 0644)
 }
 
-func fetchAll(id string, username string, endCursor string, count int, cookies *http.Cookie) {
+func fetchAll(id string, username string, endCursor string, count int) {
 	v := url.Values{}
 	v.Set("q", fmt.Sprintf(`ig_user(%s) { media.after(%s, %d) {
   count,
@@ -164,15 +167,23 @@ func fetchAll(id string, username string, endCursor string, count int, cookies *
 			}).DialContext,
 			TLSHandshakeTimeout: 1 * time.Second,
 		},
+		Jar: cookieJar,
 	}
+
 	req, err := http.NewRequest("POST", "https://www.instagram.com/query/", strings.NewReader(v.Encode()))
 	if err != nil {
 		log.Fatal(err)
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Referer", fmt.Sprintf("https://www.instagram.com/%s/", username))
-	req.Header.Set("x-csrftoken", cookies.Value)
-	req.AddCookie(cookies)
+
+	u, _ := url.Parse("https://www.instagram.com/")
+	for _, v := range cookieJar.Cookies(u) {
+		if v.Name == "csrftoken" {
+			req.Header.Set("x-csrftoken", v.Value)
+			break
+		}
+	}
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -260,7 +271,7 @@ func saveBiography(data profile, wg *sync.WaitGroup) {
 	log.Printf("Save profile `%s` `%x`\n", data.Username, hex)
 }
 
-func fetchRecently(username string) (*IGData, []*http.Cookie) {
+func fetchRecently(username string) *IGData {
 	// Get nodes
 	fetchData := fetch(username)
 	defer fetchData.Body.Close()
@@ -269,64 +280,57 @@ func fetchRecently(username string) (*IGData, []*http.Cookie) {
 	if err := json.Unmarshal(filter1(fetchData.Body), &data); err != nil {
 		log.Fatal(err)
 	}
-	return data, fetchData.Cookies()
+	return data
 }
 
 func start(user string) {
 	prepareBox(user)
-	data, cookies := fetchRecently(user)
+	data := fetchRecently(user)
 
 	var wg = &sync.WaitGroup{}
 	UserData := data.EntryData.ProfilePage[0].User
 
-	if !UserData.IsPrivate {
-		wg.Add(len(UserData.Media.Nodes)*2 + 2)
+	wg.Add(len(UserData.Media.Nodes)*2 + 2)
 
-		// Get avatar
-		go downloadAvatar(user, UserData.ProfilePicURLHd, wg)
-		go saveBiography(UserData, wg)
+	// Get avatar
+	go downloadAvatar(user, UserData.ProfilePicURLHd, wg)
+	go saveBiography(UserData, wg)
 
-		queueImg := make(chan Node, *ncpu)
-		queueCon := make(chan Node, *ncpu)
-		for _, node := range UserData.Media.Nodes {
-			go func(node Node) {
-				queueImg <- node
-				queueCon <- node
-			}(node)
-		}
-
-		go func() {
-			for node := range queueImg {
-				go downloadNodeImage(node, user, wg)
-			}
-		}()
-		go func() {
-			for node := range queueCon {
-				go saveNodeContent(node, user, wg)
-			}
-		}()
-
-		wg.Wait()
-		close(queueImg)
-		close(queueCon)
-
-		if *getAll {
-			log.Println("Get all data!!!!")
-			fetchAll(UserData.ID, UserData.Username, UserData.Media.PageInfo.EndCursor, UserData.Media.Count, cookies[0])
-		}
-
-		fmt.Println("Username:", UserData.Username)
-		fmt.Println("Count:", UserData.Media.Count)
-	} else {
-		wg.Add(2)
-		go downloadAvatar(user, UserData.ProfilePicURLHd, wg)
-		go saveBiography(UserData, wg)
-		wg.Wait()
+	queueImg := make(chan Node, *ncpu)
+	queueCon := make(chan Node, *ncpu)
+	for _, node := range UserData.Media.Nodes {
+		go func(node Node) {
+			queueImg <- node
+			queueCon <- node
+		}(node)
 	}
+
+	go func() {
+		for node := range queueImg {
+			go downloadNodeImage(node, user, wg)
+		}
+	}()
+	go func() {
+		for node := range queueCon {
+			go saveNodeContent(node, user, wg)
+		}
+	}()
+
+	wg.Wait()
+	close(queueImg)
+	close(queueCon)
+
+	if *getAll {
+		log.Println("Get all data!!!!")
+		fetchAll(UserData.ID, UserData.Username, UserData.Media.PageInfo.EndCursor, UserData.Media.Count)
+	}
+
+	fmt.Println("Username:", UserData.Username)
+	fmt.Println("Count:", UserData.Media.Count)
 }
 
 func quickLook(username string) {
-	data, _ := fetchRecently(username)
+	data := fetchRecently(username)
 	UserData := data.EntryData.ProfilePage[0].User
 	for i := len(UserData.Media.Nodes) - 1; i >= 0; i-- {
 		node := UserData.Media.Nodes[i]
@@ -443,14 +447,16 @@ func login() {
 func main() {
 	flag.Parse()
 	if len(flag.Args()) > 0 {
+		if *loginuser {
+			login()
+		}
+
 		switch {
 		case *finddel:
 			log.Println("To find deleted", flag.Arg(0))
 			findContentJSON(flag.Arg(0))
 		case *qLook:
 			quickLook(flag.Arg(0))
-		case *loginuser:
-			login()
 		default:
 			log.Printf("Delay: %ds", *delay)
 			time.Sleep(time.Duration(*delay) * time.Second)
