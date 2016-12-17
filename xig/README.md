@@ -34,6 +34,11 @@ To find some deleted content
 
     xig -f {username}
 
+Some users turn to private account, using `-u` to login user account for fetch
+private data. (required setting environment variables in `IGUSER`, `IGPASS`)
+
+    xig -u {username}
+
 Fetch folder
 -------------
 
