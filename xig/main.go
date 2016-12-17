@@ -10,6 +10,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -21,14 +22,17 @@ import (
 )
 
 var (
+	cookieJar, _ = cookiejar.New(nil)
+
 	filterV = regexp.MustCompile(`<script type="text/javascript">window._sharedData = (.+);</script>`)
 	sizeR   = regexp.MustCompile(`/[a-z][0-9]+x[0-9]+`)
 
-	delay   = flag.Int64("d", 0, "Delay to start")
-	finddel = flag.Bool("f", false, "Find deleted")
-	getAll  = flag.Bool("a", false, "Get all data")
-	ncpu    = flag.Int("c", runtime.NumCPU()*20, "concurrency nums")
-	qLook   = flag.Bool("i", false, "Quick look recently data")
+	delay     = flag.Int64("d", 0, "Delay to start")
+	finddel   = flag.Bool("f", false, "Find deleted")
+	getAll    = flag.Bool("a", false, "Get all data")
+	loginuser = flag.Bool("u", false, "Login user")
+	ncpu      = flag.Int("c", runtime.NumCPU()*20, "concurrency nums")
+	qLook     = flag.Bool("i", false, "Quick look recently data")
 )
 
 func fetch(user string) *http.Response {
@@ -398,6 +402,44 @@ func findContentJSON(username string) {
 	log.Println("Done", done)
 }
 
+func login() {
+	log.Println("Login user ...")
+	client := &http.Client{
+		Jar: cookieJar,
+	}
+	fq, _ := client.Get("https://www.instagram.com/")
+	var csrftoken string
+	for _, v := range fq.Cookies() {
+		if v.Name == "csrftoken" {
+			csrftoken = v.Value
+			break
+		}
+	}
+	data := url.Values{}
+	data.Set("username", os.Getenv("IGUSER"))
+	data.Set("password", os.Getenv("IGPASS"))
+	req, _ := http.NewRequest(
+		"POST",
+		"https://www.instagram.com/accounts/login/ajax/",
+		strings.NewReader(data.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Origin", "https://www.instagram.com")
+	req.Header.Set("Referer", "https://www.instagram.com/")
+	req.Header.Set("User-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.28 Safari/537.36")
+	req.Header.Set("x-csrftoken", csrftoken)
+	//req.Header.Set("x-instagram-ajax", "1")
+	//req.Header.Set("x-requested-with", "XMLHttpRequest")
+	u, _ := url.Parse("https://www.instagram.com/")
+	resp, _ := client.Do(req)
+	text, _ := ioutil.ReadAll(resp.Body)
+	log.Printf("Response: %s\n", text)
+	resp.Body.Close()
+
+	for _, v := range client.Jar.Cookies(u) {
+		log.Println("Cookie:", v)
+	}
+}
+
 func main() {
 	flag.Parse()
 	if len(flag.Args()) > 0 {
@@ -407,6 +449,8 @@ func main() {
 			findContentJSON(flag.Arg(0))
 		case *qLook:
 			quickLook(flag.Arg(0))
+		case *loginuser:
+			login()
 		default:
 			log.Printf("Delay: %ds", *delay)
 			time.Sleep(time.Duration(*delay) * time.Second)
