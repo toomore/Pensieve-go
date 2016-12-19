@@ -467,4 +467,5 @@ func main() {
 		fmt.Println("Options:")
 		flag.PrintDefaults()
 	}
+	fmt.Println("[!!!!] Move to `github.com/toomore/xig`")
 }

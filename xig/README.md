@@ -2,6 +2,10 @@ xig
 ====
 To fetch **instagram** user img, content, avatar data.
 
+!!!!
+-----
+Move to [**github.com/toomore/xig**](github.com/toomore/xig)
+
 install
 --------
 
