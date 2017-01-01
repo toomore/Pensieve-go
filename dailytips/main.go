@@ -7,7 +7,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func main() {
+func output() {
 	var (
 		shareFilms = [6]string{
 			"20150920 大阪 京都 東京 [films]",
@@ -30,4 +30,8 @@ func main() {
 	if int(now.Weekday())%3 == 0 {
 		color.Cyan("也確認一下 Balance")
 	}
+}
+
+func main() {
+	output()
 }
