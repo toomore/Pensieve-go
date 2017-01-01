@@ -21,8 +21,9 @@ var (
 		"白天",
 		"晚上",
 	}
-	now      = time.Now()
-	randList = getRand(len(shareFilms))
+	now        = time.Now()
+	randList   = getRand(len(shareFilms))
+	yearDayMod = now.YearDay() % len(shareFilms)
 )
 
 func getRand(n int) []int {
@@ -34,7 +35,7 @@ func output() {
 	fmt.Printf("今天 %d %s, 是 %d 年的第 %s 天\n",
 		now.Day(), now.Month(), now.Year(), color.YellowString("%d", now.YearDay()))
 	fmt.Printf("建議分享的是 \"%s\" 的主題，",
-		color.YellowString("%s", shareFilms[randList[now.YearDay()%len(shareFilms)]]))
+		color.YellowString("%s", shareFilms[randList[yearDayMod]]))
 	fmt.Printf("在 %s 分享比較好\n",
 		color.YellowString("%s", shareTime[int(now.Weekday())%len(shareTime)]))
 	if int(now.Weekday())%3 == 0 {
@@ -46,7 +47,11 @@ func main() {
 	output()
 	fmt.Println("")
 	fmt.Println("This time list:")
-	for _, v := range randList {
-		fmt.Println(" =", v, shareFilms[v])
+	for i, v := range randList {
+		if i == yearDayMod {
+			fmt.Println(color.YellowString(" = %d %s", v, shareFilms[v]))
+		} else {
+			fmt.Println(" =", v, shareFilms[v])
+		}
 	}
 }
