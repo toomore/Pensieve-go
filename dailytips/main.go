@@ -9,11 +9,13 @@ import (
 
 func main() {
 	var (
-		shareFilms = [4]string{
+		shareFilms = [6]string{
 			"20150920 大阪 京都 東京 [films]",
 			"20160131 北海道 小樽 千葉 求名 銚子 東京",
 			"20160521 橫濱 東京 二日往返",
 			"20160924 廣島 福岡",
+			"Guam",
+			"20161119 東京蚤の市",
 		}
 		shareTime = [2]string{
 			"白天",
