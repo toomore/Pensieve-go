@@ -39,8 +39,11 @@ func output() {
 		color.YellowString("%s", shareFilms[randList[yearDayMod]]))
 	fmt.Printf("在 %s 分享比較好\n",
 		color.YellowString("%s", shareTime[int(now.Weekday())%len(shareTime)]))
-	if int(now.Weekday())%3 == 0 {
+	if now.Weekday()%3 == 0 {
 		color.Cyan("也確認一下 Balance")
+	}
+	if 3 <= now.Weekday() || now.Weekday() <= 4 {
+		color.Cyan("\n- Write Nore !")
 	}
 }
 
