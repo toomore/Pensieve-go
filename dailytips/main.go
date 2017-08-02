@@ -10,7 +10,7 @@ import (
 
 var (
 	shareFilms = [7]string{
-		"20150920 大阪 京都 東京 [films]",
+		"Share day",
 		"20160131 北海道 小樽 千葉 求名 銚子 東京",
 		"20160521 橫濱 東京 二日往返",
 		"20160924 廣島 福岡",
@@ -128,7 +128,6 @@ func main() {
 			fmt.Println(" =", v, shareFilms[v])
 		}
 	}
-	countDown(2017, 6, 1)
 	countDown(2017, 8, 22)
 	countDown(2017, 9, 29)
 	countDown(2017, 10, 17)
