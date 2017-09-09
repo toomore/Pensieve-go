@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
 	"strconv"
 	"time"
@@ -28,7 +29,7 @@ func checkRepeat(h []byte, n int, b byte) bool {
 }
 
 func work(body []byte, nowStr string, rn int, b byte, n int, done *bool, limit chan struct{}) {
-	data := append(body[:], []byte(strconv.Itoa(n))...)
+	data := append(body[:], []byte(base64.RawStdEncoding.EncodeToString([]byte(strconv.Itoa(n))))...)
 	data = append(data[:], []byte(nowStr)...)
 	h := sha256.New()
 	h.Write(data)
@@ -38,7 +39,7 @@ func work(body []byte, nowStr string, rn int, b byte, n int, done *bool, limit c
 		fmt.Printf("%x\n", s)
 		fmt.Println("t:", nowStr)
 		fmt.Println("n:", n)
-		fmt.Println(data)
+		fmt.Printf("echo -n %s | openssl dgst -sha256\n", data)
 		*done = false
 	}
 	<-limit
