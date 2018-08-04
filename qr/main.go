@@ -16,7 +16,8 @@ import (
 )
 
 var (
-	msg          = flag.String("f", "./msg.txt", "message file")
+	file         = flag.String("f", "", "message file")
+	msg          = flag.String("m", "", "message string")
 	size         = flag.Int("s", 600, "PNG size")
 	q            = flag.String("q", "M", "L(7%), M(15%), Q(25%), H(30%)")
 	outputbase64 = flag.Bool("b64", false, "Output base64 file")
@@ -32,12 +33,19 @@ var (
 func main() {
 	flag.Parse()
 
-	content, err := ioutil.ReadFile(*msg)
-	if err != nil {
-		log.Fatal(err)
+	var content string
+
+	if *file != "" {
+		msgBite, err := ioutil.ReadFile(*file)
+		if err != nil {
+			log.Fatal(err)
+		}
+		content = string(msgBite)
+	} else {
+		content = *msg
 	}
 	// Create the barcode
-	qrCode, _ := qr.Encode(string(content), qm[*q], qr.Unicode)
+	qrCode, _ := qr.Encode(content, qm[*q], qr.Unicode)
 
 	// Scale the barcode to size*size pixels
 	qrCode, _ = barcode.Scale(qrCode, *size, *size)
